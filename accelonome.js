@@ -12,7 +12,7 @@ var jumpOnBar = null;
 var noteLength = 0.05;
 var nextNoteTime = 0;
 var scheduleAheadTime = 0.1;
-var currentBar = 0;
+var currentBar = 1;
 var barChanged = false;
 var beat = 1;
 var lookahead = 25.0;
@@ -29,6 +29,7 @@ function nextNote() {
         if (tempo == endTempo) {
             tempo = startTempo;
         }
+        refreshUI();
         console.log("tempo changed " + tempo);
         barChanged = false;
     }
@@ -41,6 +42,22 @@ function scheduleSound() {
     }
 }
 
+function hitReset() {
+    tempo = startTempo;
+    currentBar = 1;
+    beat = 1;
+    document.getElementById("playButton").textContent = "Play";
+    refreshUI();
+    isPlaying = false;
+    timerWorker.postMessage("stop");
+    return;
+}
+
+function refreshUI() {
+    document.getElementById("currentTempo").textContent = "Current BPM: " + tempo;
+    document.getElementById("currentBar").textContent = "Current Bar: " + currentBar;
+}
+
 function hitPlay() {
     startTempo = parseInt(document.getElementById("startTempo").value);
     endTempo = parseInt(document.getElementById("endTempo").value);
@@ -50,15 +67,20 @@ function hitPlay() {
     isPlaying = !isPlaying;
 
     if (!isPlaying) {
+        currentBar = 1;
+        beat = 1;
         timerWorker.postMessage("stop");
+        refreshUI();
         return "Play";
     }
 
     if (!startTempo) {
         return "Play";
     }
-
-    tempo = startTempo;
+    if (!tempo) {
+        tempo = startTempo;
+    }
+    refreshUI();
     currentBeat = 0;
     nextNoteTime = audioCtx.currentTime;
     timerWorker.postMessage("start");
@@ -75,6 +97,7 @@ function makeSound(beat, start) {
     if (beat % 4 === 0 ) {  // quarter notes = medium pitch
         osc.frequency.value = 440.0;
         currentBar += 1;
+        refreshUI();
         barChanged = true
     } else                        // other 16th notes = low pitch
         osc.frequency.value = 220.0;
