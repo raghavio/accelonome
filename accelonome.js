@@ -93,10 +93,12 @@ function makeSound(beat, start) {
     // connect oscillator to gain node to speakers
     osc.connect(audioCtx.destination);
     refreshUI();
-    if (beat % 4 === 1 ) {  // quarter notes = medium pitch
+    if (beat % 4 === 1) {  // quarter notes = medium pitch
         osc.frequency.value = 440.0;
+    } else if (beat % 4 === 0 ) {
         currentBar += 1;
         barChanged = true
+        osc.frequency.value = 220.0;
     } else                        // other 16th notes = low pitch
         osc.frequency.value = 220.0;
 
