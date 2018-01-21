@@ -23,14 +23,13 @@ function nextNote() {
     nextNoteTime += secondsPerBeat;
 
     beat++;
-    console.log("tempo " + tempo);
     if (currentBar % jumpOnBar == 0 && barChanged == true) {
         tempo += jumpBpm;
         if (tempo == endTempo) {
             tempo = startTempo;
         }
+        currentBar = 1;
         refreshUI();
-        console.log("tempo changed " + tempo);
         barChanged = false;
     }
 }
@@ -62,7 +61,7 @@ function hitPlay() {
     startTempo = parseInt(document.getElementById("startTempo").value);
     endTempo = parseInt(document.getElementById("endTempo").value);
     jumpBpm = parseInt(document.getElementById("jumpTempo").value);
-    jumpOnBar = parseInt(document.getElementById("jumpOnBar").value);
+    jumpOnBar = parseInt(document.getElementById("jumpOnBar").value) + 1;
 
     isPlaying = !isPlaying;
 
@@ -93,11 +92,10 @@ function makeSound(beat, start) {
 
     // connect oscillator to gain node to speakers
     osc.connect(audioCtx.destination);
-
+    refreshUI();
     if (beat % 4 === 0 ) {  // quarter notes = medium pitch
         osc.frequency.value = 440.0;
         currentBar += 1;
-        refreshUI();
         barChanged = true
     } else                        // other 16th notes = low pitch
         osc.frequency.value = 220.0;
