@@ -106,6 +106,12 @@ function makeSound(beat, start) {
     osc.stop(start + noteLength);
 }
 
+// play silent buffer to unlock the audio. Fix for iOS.
+var buffer = audioCtx.createBuffer(1, 1, 22050);
+var node = audioCtx.createBufferSource();
+node.buffer = buffer;
+node.start(0);
+
 timerWorker.onmessage = function(e) {
     if (e.data == "tick") {
         scheduleSound();
