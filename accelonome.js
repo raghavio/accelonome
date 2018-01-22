@@ -16,7 +16,7 @@ var currentBar = 1;
 var barChanged = false;
 var beat = 1;
 var lookahead = 25.0;
-
+var playedEmptyBuffer = false;
 
 function nextNote() {
     var secondsPerBeat = 60.0 / tempo;
@@ -58,6 +58,15 @@ function refreshUI() {
 }
 
 function hitPlay() {
+    if (!playedEmptyBuffer) {
+        // play silent buffer to unlock the audio. Fix for iOS.
+        var buffer = audioCtx.createBuffer(1, 1, 22050);
+        var node = audioCtx.createBufferSource();
+        node.buffer = buffer;
+        node.connect(audioCtx.destination);
+        node.start(0);
+        playedEmptyBuffer = true;
+    }
     startTempo = parseInt(document.getElementById("startTempo").value);
     endTempo = parseInt(document.getElementById("endTempo").value);
     jumpBpm = parseInt(document.getElementById("jumpTempo").value);
@@ -105,12 +114,6 @@ function makeSound(beat, start) {
     osc.start(start);
     osc.stop(start + noteLength);
 }
-
-// play silent buffer to unlock the audio. Fix for iOS.
-var buffer = audioCtx.createBuffer(1, 1, 22050);
-var node = audioCtx.createBufferSource();
-node.buffer = buffer;
-node.start(0);
 
 timerWorker.onmessage = function(e) {
     if (e.data == "tick") {
