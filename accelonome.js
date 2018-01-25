@@ -25,7 +25,7 @@ function nextNote() {
     beat++;
     if (currentBar % jumpOnBar == 0 && barChanged == true) {
         tempo += jumpBpm;
-        if (tempo == endTempo) {
+        if (tempo > endTempo) {
             tempo = startTempo;
         }
         currentBar = 1;
