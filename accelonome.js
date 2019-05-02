@@ -12,24 +12,24 @@ var jumpOnBar = null;
 var noteLength = 0.05;
 var nextNoteTime = 0;
 var scheduleAheadTime = 0.1;
-var currentBar = 0;
+var currentBar = 1;
 var barChanged = false;
 var beat = 1;
 var lookahead = 25.0;
-
+var playedEmptyBuffer = false;
 
 function nextNote() {
     var secondsPerBeat = 60.0 / tempo;
     nextNoteTime += secondsPerBeat;
 
     beat++;
-    console.log("tempo " + tempo);
     if (currentBar % jumpOnBar == 0 && barChanged == true) {
         tempo += jumpBpm;
-        if (tempo == endTempo) {
+        if (tempo > endTempo) {
             tempo = startTempo;
         }
-        console.log("tempo changed " + tempo);
+        currentBar = 1;
+        refreshUI();
         barChanged = false;
     }
 }
@@ -41,24 +41,54 @@ function scheduleSound() {
     }
 }
 
+function hitReset() {
+    tempo = startTempo;
+    currentBar = 1;
+    beat = 1;
+    document.getElementById("playButton").textContent = "Play";
+    refreshUI();
+    isPlaying = false;
+    timerWorker.postMessage("stop");
+    return;
+}
+
+function refreshUI() {
+    document.getElementById("currentTempo").textContent = "Current BPM: " + tempo;
+    document.getElementById("currentBar").textContent = "Current Bar: " + currentBar;
+}
+
 function hitPlay() {
+    if (!playedEmptyBuffer) {
+        // play silent buffer to unlock the audio. Fix for iOS.
+        var buffer = audioCtx.createBuffer(1, 1, 22050);
+        var node = audioCtx.createBufferSource();
+        node.buffer = buffer;
+        node.connect(audioCtx.destination);
+        node.start(0);
+        playedEmptyBuffer = true;
+    }
     startTempo = parseInt(document.getElementById("startTempo").value);
     endTempo = parseInt(document.getElementById("endTempo").value);
     jumpBpm = parseInt(document.getElementById("jumpTempo").value);
-    jumpOnBar = parseInt(document.getElementById("jumpOnBar").value);
+    jumpOnBar = parseInt(document.getElementById("jumpOnBar").value) + 1;
 
     isPlaying = !isPlaying;
 
     if (!isPlaying) {
+        currentBar = 1;
+        beat = 1;
         timerWorker.postMessage("stop");
+        refreshUI();
         return "Play";
     }
 
     if (!startTempo) {
         return "Play";
     }
-
-    tempo = startTempo;
+    if (!tempo) {
+        tempo = startTempo;
+    }
+    refreshUI();
     currentBeat = 0;
     nextNoteTime = audioCtx.currentTime;
     timerWorker.postMessage("start");
@@ -71,11 +101,13 @@ function makeSound(beat, start) {
 
     // connect oscillator to gain node to speakers
     osc.connect(audioCtx.destination);
-
-    if (beat % 4 === 0 ) {  // quarter notes = medium pitch
+    refreshUI();
+    if (beat % 4 === 1) {  // quarter notes = medium pitch
         osc.frequency.value = 440.0;
+    } else if (beat % 4 === 0 ) {
         currentBar += 1;
         barChanged = true
+        osc.frequency.value = 220.0;
     } else                        // other 16th notes = low pitch
         osc.frequency.value = 220.0;
 

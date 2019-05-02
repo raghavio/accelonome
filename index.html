@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="favicon.ico" type="image/gif" sizes="16x16">
-    <title>Accelonome!</title>
+    <title>Accelonome</title>
 
     <!-- Bootstrap -->
     <link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
@@ -19,39 +19,55 @@
       });
     </script>    
   </head>
-  <body style="background-color: #000000;color: #ffffff">
-    <div class="container">
-        <div class="text-center">
-            <img style="margin-top: 20px" src="header_icon.png"></img>
-            <h1 style="font-family: 'Amatic SC', cursive; font-size: 65px">Accelonome</h1>
-            <div class="col-md-12">
-                <form class="form-inline">
-                <div class="form-group">
-                    <label for="startTempo">Start BPM</label>
-                    <input type="number" class="form-control" id="startTempo" placeholder="100">
-                  </div>
-                  <div class="form-group">
-                      <label for="endTempo">End BPM</label>
-                      <input type="number" class="form-control" id="endTempo" placeholder="180">
-                </div>
-                <div class="form-group">
-                    <label for="jumpTempo">Jump BPM</label>
-                    <input type="number" class="form-control" id="jumpTempo" placeholder="10">
-                  </div>
-                  <div class="form-group">
-                      <label for="jumpOnBar">Interval Bar</label>
-                      <input type="number" class="form-control" id="jumpOnBar" placeholder="3">
-                    </div>
-                </form>
-            </div>
-            <div class="btn-group" style="margin-top: 20px" role="group">
-                <button type="button" class="btn btn-lg btn-success" onclick="this.innerText = hitPlay();">Play</button>
-            </div>
-        </div>
-    </div>
+  <body style="background-color: #000000;color: #ffffff;">
+	<div class="container">
+		<div class="text-center">
+			<div class="page-header">
+			<img src="header_icon.png" alt="Accelonome Logo" style="vertical-align:middle"/>
+			<span style="font-family: 'Amatic SC', cursive; font-size: 45px">Accelonome</span>
+		</div>
+			<form class="form-horizontal">
+			<div class="form-group">
+				<label for="startTempo" class="col-xs-4 col-md-2 col-md-2 col-md-offset-3 control-label">Start BPM</label>
+				<div class="col-xs-8 col-sm-5 col-md-3">
+				<input type="number" class="form-control" id="startTempo" value="100">
+			</div>
+			  </div>
+			  <div class="form-group">
+				  <label for="endTempo" class="col-xs-4 col-md-2 col-md-offset-3 control-label">End BPM</label>
+				  <div class="col-xs-8 col-sm-5 col-md-3">
+				  <input type="number" class="form-control" id="endTempo" value="180">
+			  </div>
+			</div>
+			<div class="form-group">
+				<label for="jumpTempo" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Jump BPM</label>
+				<div class="col-xs-8 col-sm-5 col-md-3">
+				<input type="number" class="form-control" id="jumpTempo" value="10">
+			</div>
+			  </div>
+			  <div class="form-group">
+				  <label for="jumpOnBar" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Interval Bar</label>
+				  <div class="col-xs-8 col-sm-5 col-md-3">
+				  <input type="number" class="form-control" id="jumpOnBar" value="4">
+			  </div>
+				</div>
+				<div class="form-group">
+				<label id="currentTempo" class="col-xs-6 col-sm-3 col-sm-offset-1 col-md-offset-2 control-label">Current BPM: </label>
+				<label id="currentBar" class="col-xs-6 col-sm-5 col-md-3 control-label">Current Bar: </label>
+			</div>
+				<div class="btn-group" style="margin-top: 20px" role="group">
+					<button type="button" id="playButton" class="btn btn-lg btn-success" style="margin-right: 10px" onclick="this.innerText = hitPlay();">Play</button>
+				</div>
+				<div class="btn-group" style="margin-top: 20px" role="group">
+					<button type="button" class="btn btn-lg btn-warning" onclick="hitReset();">Reset</button>
+				</div>
+			</div>
+			</form>
+		</div>
+	</div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   </body>
 </html>
