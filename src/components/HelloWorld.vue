@@ -1,96 +1,19 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br />
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener"
-        >vue-cli documentation</a
-      >.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel"
-          target="_blank"
-          rel="noopener"
-          >babel</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-pwa"
-          target="_blank"
-          rel="noopener"
-          >pwa</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint"
-          target="_blank"
-          rel="noopener"
-          >eslint</a
-        >
-      </li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li>
-        <a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a>
-      </li>
-      <li>
-        <a href="https://forum.vuejs.org" target="_blank" rel="noopener"
-          >Forum</a
-        >
-      </li>
-      <li>
-        <a href="https://chat.vuejs.org" target="_blank" rel="noopener"
-          >Community Chat</a
-        >
-      </li>
-      <li>
-        <a href="https://twitter.com/vuejs" target="_blank" rel="noopener"
-          >Twitter</a
-        >
-      </li>
-      <li>
-        <a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a>
-      </li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li>
-        <a href="https://router.vuejs.org" target="_blank" rel="noopener"
-          >vue-router</a
-        >
-      </li>
-      <li>
-        <a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/vue-devtools#vue-devtools"
-          target="_blank"
-          rel="noopener"
-          >vue-devtools</a
-        >
-      </li>
-      <li>
-        <a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener"
-          >vue-loader</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-          rel="noopener"
-          >awesome-vue</a
-        >
-      </li>
-    </ul>
+    <span>Time Signature:</span>
+    <select v-model="time_sig">
+      <option>2/4</option>
+      <option>3/4</option>
+      <option>4/4</option>
+    </select>
+    <br>
+    <span>Start BPM: </span><input v-model.number="start_bpm" type="number">
+    <p><button v-on:click="startMetronome">Start</button></p>
+    <br>
+    <br>
+    <span>State: </span> Time: {{ time_sig}} Start BPM: {{start_bpm}}
+    <audio src="media/Low_Woodblock.9c4ccf45.wav" crossorigin="anonymous"></audio>
   </div>
 </template>
 
@@ -98,7 +21,57 @@
 export default {
   name: "HelloWorld",
   props: {
-    msg: String
+    msg: String,
+    time_sig: String,
+    start_bpm: Number
+  },
+  methods: {
+    startMetronome: function () {
+        //const self = this;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        const audioElement = document.querySelector('audio');
+        const source = audioCtx.createMediaElementSource(audioElement);
+        source.connect(audioCtx.destination);
+        /*
+        const request = new XMLHttpRequest();  // Consider audio tag
+        let source = audioCtx.createBufferSource();
+        request.onload = function() {
+            audioCtx.decodeAudioData(request.response, function(buffer) {
+                source.buffer = buffer;
+                source.connect(audioCtx.destination);
+              },
+              function(e){"Error with decoding audio data" + e.error});
+
+        }
+        console.log(require('@/assets/Low_Woodblock.wav'));
+        request.open('GET', require('@/assets/Low_Woodblock.wav'), true);
+        request.responseType = 'arraybuffer';
+        request.send();*/
+/*
+        function playMetronome() {
+            let nextStart = audioCtx.currentTime;
+
+            function schedule() {
+                nextStart += 60 / self.start_bpm;
+                source.start(nextStart);
+            }
+
+            schedule();
+        }
+
+        playMetronome();*/
+        let bpm = 60;
+        let nextNoteTime = audioCtx.currentTime;
+        while (nextNoteTime < audioCtx.currentTime + 0.1) {
+            audioElement.play();
+            nextNoteTime += bpm/60;
+
+            console.log(nextNoteTime);
+            console.log(audioCtx.currentTime);
+        }
+        console.log(audioCtx.currentTime);
+    }
   }
 };
 </script>
