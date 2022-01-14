@@ -1,124 +1,89 @@
-// create web audio api context
-var AudioContext = window.AudioContext || window.webkitAudioContext;
-var audioCtx = new AudioContext();
-var timerWorker = new Worker("worker.js");
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioContext();
+const timerWorker = new Worker("worker.js");
 
-var isPlaying = false;
-var startTempo = null;
-var tempo = null;
-var endTempo = null;
-var jumpBpm = null;
-var jumpOnBar = null;
-var noteLength = 0.05;
-var nextNoteTime = 0;
-var scheduleAheadTime = 0.1;
-var currentBar = 1;
-var barChanged = false;
-var beat = 1;
-var lookahead = 25.0;
-var playedEmptyBuffer = false;
-
-function nextNote() {
-    var secondsPerBeat = 60.0 / tempo;
-    nextNoteTime += secondsPerBeat;
-
-    beat++;
-    if (currentBar % jumpOnBar == 0 && barChanged == true) {
-        tempo += jumpBpm;
-        if (tempo > endTempo) {
-            tempo = startTempo;
+const vueApp = {
+    data() {
+        return {
+            isPlaying: false,
+            startTempo: 100,
+            tempo: null,
+            endTempo: 180,
+            jumpBpm: 10,
+            jumpOnBar: 4,
+            noteLength: 0.05,
+            nextNoteTime: 0,
+            currentBar: 1,
+            scheduledBeats: []
         }
-        currentBar = 1;
-        refreshUI();
-        barChanged = false;
+    },
+    methods: {
+        hitReset() {
+            this.tempo = null;
+            this.stop();
+        },
+        stop() {
+            this.currentBar = 1;
+            this.isPlaying = false;
+            timerWorker.postMessage("stop");
+            this.scheduledBeats.forEach(osc => {
+                osc.stop();
+            });
+            this.scheduledBeats = [];
+        },
+        play() {
+            if (!this.tempo)
+                this.tempo = this.startTempo;
+            this.isPlaying = true;
+            this.currentBeat = 0;
+            this.nextNoteTime = audioCtx.currentTime;
+            timerWorker.postMessage(["scheduleBar", 0]);
+        },
+        scheduleBar() {
+            const secondsPerBeat = 60.0 / this.tempo;
+            for (let beat = 1; beat <= 4; beat++) {
+                let osc = audioCtx.createOscillator();
+                osc.connect(audioCtx.destination);
+
+                if (beat === 1) {
+                    osc.frequency.value = 440.0;
+                } else {
+                    osc.frequency.value = 220.0;
+                }
+                osc.start(this.nextNoteTime);
+                osc.stop(this.nextNoteTime + this.noteLength);
+                this.scheduledBeats.push(osc);  // store the objects so we can stop later if required.
+                this.nextNoteTime += secondsPerBeat;
+            }
+            // schedule next bar half a second before the current bar finishes.
+            next_bar_to_be_scheduled_in_seconds = (this.nextNoteTime - audioCtx.currentTime);
+            timerWorker.postMessage(["scheduleBar", next_bar_to_be_scheduled_in_seconds]);
+        },
+        barCompleted() {
+            this.currentBar += 1;
+            this.scheduledBeats.splice(0, 4); // remove the played beats after a bar is over.
+            let canChangeTempo = this.currentBar == this.jumpOnBar;
+            if (canChangeTempo) {
+                let updatedTempo = this.tempo + this.jumpBpm;
+                if (updatedTempo > this.endTempo)
+                    updatedTempo = this.startTempo;
+                this.tempo = updatedTempo;
+                this.currentBar = 1;  // also reset bar back to 1.
+            }
+        }
+
+    },
+    mounted() {
+        timerWorker.onmessage = (e) => {
+            if (e.data == "tick") {
+                // if there were scheduled beats then that means the bar is finished.
+                // this should get run everytime except the very first time.
+                if (this.scheduledBeats.length > 0)
+                    this.barCompleted();
+                this.scheduleBar();
+            }
+        }
     }
 }
 
-function scheduleSound() {
-    while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime ) {
-        makeSound(beat, nextNoteTime);
-        nextNote();
-    }
-}
-
-function hitReset() {
-    tempo = startTempo;
-    currentBar = 1;
-    beat = 1;
-    document.getElementById("playButton").textContent = "Play";
-    refreshUI();
-    isPlaying = false;
-    timerWorker.postMessage("stop");
-    return;
-}
-
-function refreshUI() {
-    document.getElementById("currentTempo").textContent = "Current BPM: " + tempo;
-    document.getElementById("currentBar").textContent = "Current Bar: " + currentBar;
-}
-
-function hitPlay() {
-    if (!playedEmptyBuffer) {
-        // play silent buffer to unlock the audio. Fix for iOS.
-        var buffer = audioCtx.createBuffer(1, 1, 22050);
-        var node = audioCtx.createBufferSource();
-        node.buffer = buffer;
-        node.connect(audioCtx.destination);
-        node.start(0);
-        playedEmptyBuffer = true;
-    }
-    startTempo = parseInt(document.getElementById("startTempo").value);
-    endTempo = parseInt(document.getElementById("endTempo").value);
-    jumpBpm = parseInt(document.getElementById("jumpTempo").value);
-    jumpOnBar = parseInt(document.getElementById("jumpOnBar").value) + 1;
-
-    isPlaying = !isPlaying;
-
-    if (!isPlaying) {
-        currentBar = 1;
-        beat = 1;
-        timerWorker.postMessage("stop");
-        refreshUI();
-        return "Play";
-    }
-
-    if (!startTempo) {
-        return "Play";
-    }
-    if (!tempo) {
-        tempo = startTempo;
-    }
-    refreshUI();
-    currentBeat = 0;
-    nextNoteTime = audioCtx.currentTime;
-    timerWorker.postMessage("start");
-    return "Stop";
-}
-
-function makeSound(beat, start) {
-    // create Oscillator and gain node
-    var osc = audioCtx.createOscillator();
-
-    // connect oscillator to gain node to speakers
-    osc.connect(audioCtx.destination);
-    refreshUI();
-    if (beat % 4 === 1) {  // quarter notes = medium pitch
-        osc.frequency.value = 440.0;
-    } else if (beat % 4 === 0 ) {
-        currentBar += 1;
-        barChanged = true
-        osc.frequency.value = 220.0;
-    } else                        // other 16th notes = low pitch
-        osc.frequency.value = 220.0;
-
-    osc.start(start);
-    osc.stop(start + noteLength);
-}
-
-timerWorker.onmessage = function(e) {
-    if (e.data == "tick") {
-        scheduleSound();
-    } else
-        console.log("message: " + e.data);
-};
-timerWorker.postMessage({"interval":lookahead});
+Vue.createApp(vueApp).mount('#vue-app');
