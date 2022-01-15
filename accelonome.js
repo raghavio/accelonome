@@ -14,7 +14,9 @@ const vueApp = {
             noteLength: 0.05,
             nextNoteTime: 0,
             currentBar: 1,
-            scheduledBeats: []
+            scheduledBeats: [],
+            note: 4,  // default to quarter note.
+            beats: 4, // default to 4/4
         }
     },
     methods: {
@@ -40,15 +42,16 @@ const vueApp = {
             timerWorker.postMessage(["scheduleBar", 0]);
         },
         scheduleBar() {
-            const secondsPerBeat = 60.0 / this.tempo;
-            for (let beat = 1; beat <= 4; beat++) {
+            note_multiplier = this.note / 4;  // will give 2 for 8th note. 1 quarter note = 2 8th note.
+            const secondsPerBeat = 60.0 / (this.tempo * note_multiplier);
+            for (let beat = 1; beat <= this.beats; beat++) {
                 let osc = audioCtx.createOscillator();
                 osc.connect(audioCtx.destination);
 
                 if (beat === 1) {
-                    osc.frequency.value = 440.0;
+                    osc.frequency.value = 880.0;
                 } else {
-                    osc.frequency.value = 220.0;
+                    osc.frequency.value = 440;
                 }
                 osc.start(this.nextNoteTime);
                 osc.stop(this.nextNoteTime + this.noteLength);
@@ -62,7 +65,7 @@ const vueApp = {
         barCompleted() {
             this.currentBar += 1;
             this.scheduledBeats.splice(0, 4); // remove the played beats after a bar is over.
-            let canChangeTempo = this.currentBar == this.jumpOnBar;
+            let canChangeTempo = this.currentBar == this.jumpOnBar + 1;
             if (canChangeTempo) {
                 let updatedTempo = this.tempo + this.jumpBpm;
                 if (updatedTempo > this.endTempo)
