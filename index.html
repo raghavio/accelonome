@@ -65,6 +65,44 @@
 					</div>
 				</div>
 				<div class="form-group">
+					<label for="jumpOnBar" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Interval Bar</label>
+					<div class="col-xs-8 col-sm-5 col-md-3">
+						<input type="number" class="form-control" v-model="jumpOnBar">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="jumpOnBar" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Time Signature</label>
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<select class="form-control" v-model="beats">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="7">7</option>
+							<option value="8">8</option>
+							<option value="9">9</option>
+							<option value="10">10</option>
+							<option value="11">11</option>
+							<option value="12">12</option>
+							<option value="13">13</option>
+							<option value="14">14</option>
+							<option value="15">15</option>
+							<option value="16">16</option>
+						</select>
+					</div>
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<select class="form-control" v-model="note">
+							<option value="2">2</option>
+							<option value="4">4</option>
+							<option value="8">8</option>
+							<option value="16">16</option>							
+						</select>
+					</div>
+					
+				</div>
+				<div class="form-group">
 					<label id="currentTempo"
 						class="col-xs-6 col-sm-3 col-sm-offset-1 col-md-offset-2 control-label">Current BPM:
 						{{tempo}}</label>
