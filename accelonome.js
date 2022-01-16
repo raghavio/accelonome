@@ -18,6 +18,7 @@ const vueApp = {
             scheduledBeats: [],
             note: 4,  // default to quarter note.
             beats: 4, // default to 4/4
+            accentedBeats: [1],
         }
     },
     methods: {
@@ -58,7 +59,7 @@ const vueApp = {
                 let osc = audioCtx.createOscillator();
                 osc.connect(audioCtx.destination);
 
-                if (beat === 1) {
+                if (this.accentedBeats.includes(beat)) {
                     osc.frequency.value = 880.0;
                 } else {
                     osc.frequency.value = 440;
@@ -95,6 +96,12 @@ const vueApp = {
                     this.barCompleted();
                 this.scheduleBar();
             }
+        }
+    },
+    watch: {
+        //  bootstrap-select doesn't auto update on its own.
+        beats: (newValues, oldValues) => {
+            this.$nextTick(() => { $('.selectpicker').selectpicker('refresh'); });
         }
     }
 }
