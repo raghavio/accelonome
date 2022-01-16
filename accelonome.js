@@ -1,6 +1,7 @@
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 const timerWorker = new Worker("worker.js");
+let playedEmptyBuffer = false;
 
 const vueApp = {
     data() {
@@ -34,6 +35,15 @@ const vueApp = {
             this.scheduledBeats = [];
         },
         play() {
+            if (!playedEmptyBuffer) {
+                // play silent buffer to unlock the audio. Fix for iOS.
+                let buffer = audioCtx.createBuffer(1, 1, 22050);
+                let node = audioCtx.createBufferSource();
+                node.buffer = buffer;
+                node.connect(audioCtx.destination);
+                node.start(0);
+                playedEmptyBuffer = true;
+            }
             if (!this.tempo)
                 this.tempo = this.startTempo;
             this.isPlaying = true;
