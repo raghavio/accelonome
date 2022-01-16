@@ -12,7 +12,9 @@
 	<link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
 		integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<script src="https://unpkg.com/vue@3.2.26/dist/vue.global.prod.js"></script>
+	<link rel="stylesheet"
+		href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+
 	<!-- <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 	<script>
 		(adsbygoogle = window.adsbygoogle || []).push({
@@ -65,9 +67,10 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label for="jumpOnBar" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Time Signature</label>
+					<label for="jumpOnBar" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Time
+						Signature</label>
 					<div class="col-xs-4 col-sm-2 col-md-1">
-						<select class="form-control" v-model="beats">
+						<select class="form-control" v-model.number="beats">
 							<option value="1">1</option>
 							<option value="2">2</option>
 							<option value="3">3</option>
@@ -91,10 +94,17 @@
 							<option value="2">2</option>
 							<option value="4">4</option>
 							<option value="8">8</option>
-							<option value="16">16</option>							
+							<option value="16">16</option>
 						</select>
 					</div>
-					
+				</div>
+				<div class="form-group">
+					<div class="col-xs-offset-4 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-5 col-md-2">
+						<select class="selectpicker form-control" multiple title="Accent beats"
+							data-selected-text-format="static" v-model="accentedBeats">
+							<option v-for="beat in beats" :value=beat :key="beat">{{beat}}</option>
+						</select>
+					</div>
 				</div>
 				<div class="form-group">
 					<label id="currentTempo"
@@ -115,6 +125,12 @@
 		</form>
 	</div>
 	</div>
+	<script src="https://unpkg.com/vue@3.2.26/dist/vue.global.prod.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+		integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+		crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
 	<script src="accelonome.js"></script>
 </body>
 
