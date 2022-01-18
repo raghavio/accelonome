@@ -119,6 +119,9 @@ const vueApp = {
         //  bootstrap-select doesn't auto update on its own.
         beats: function (newValues, oldValues) {
             this.$nextTick(() => { $('.selectpicker').selectpicker('refresh'); });
+        },
+        startTempo: function (newValues, oldValues) {
+            this.tempo = this.startTempo;  // set new tempo only when startTempo's value changes.
         }
     }
 }
