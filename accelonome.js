@@ -22,10 +22,6 @@ const vueApp = {
         }
     },
     methods: {
-        hitReset() {
-            this.tempo = null;
-            this.stop();
-        },
         stop() {
             this.currentBar = 1;
             this.isPlaying = false;
@@ -34,6 +30,7 @@ const vueApp = {
                 osc.stop();
             });
             this.scheduledBeats = [];
+            $('.dial').stop();
         },
         play() {
             if (!playedEmptyBuffer) {
@@ -55,6 +52,18 @@ const vueApp = {
         scheduleBar() {
             note_multiplier = this.note / 4;  // will give 2 for 8th note. 1 quarter note = 2 8th note.
             const secondsPerBeat = 60.0 / (this.tempo * note_multiplier);
+            if (this.currentBar == 1) {
+                $('.dial').animate({ value: 100 }, {
+                    duration: (secondsPerBeat * this.beats * this.jumpOnBar) * 1000 - 20,
+                    easing: 'linear',
+                    step: function () {
+                        $('.dial').val(this.value).trigger('change');
+                    },
+                    always: function () {
+                        $('.dial').val(0).trigger('change');
+                    }
+                });
+            }
             for (let beat = 1; beat <= this.beats; beat++) {
                 let osc = audioCtx.createOscillator();
                 osc.connect(audioCtx.destination);
@@ -97,6 +106,14 @@ const vueApp = {
                 this.scheduleBar();
             }
         }
+        $(".dial").knob({
+            width: 350,
+            height: 350,
+            thickness: '0.10',
+            fgColor: '#ffeb3a',
+            readOnly: true,
+            bgColor: '#2295f1'
+        });
     },
     watch: {
         //  bootstrap-select doesn't auto update on its own.
