@@ -11,7 +11,7 @@ const vueApp = {
             tempo: null,
             endTempo: 180,
             jumpBpm: 10,
-            jumpOnBar: 4,
+            tempoChangeAfterX: 4,  // value of the tempo change trigger. could be number of bars, seconds or minutes.
             noteLength: 0.05,
             nextNoteTime: 0,
             currentBar: 1,
@@ -19,6 +19,8 @@ const vueApp = {
             note: 4,  // default to quarter note.
             beats: 4, // default to 4/4
             accentedBeats: [1],
+            tempoChangeTrigger: 'bar', // tempo should get changed on Bar by default.
+            lastTempoChangeTime: null, // time when user clicked play.
         }
     },
     methods: {
@@ -46,6 +48,7 @@ const vueApp = {
                 this.tempo = this.startTempo;
             this.isPlaying = true;
             this.nextNoteTime = audioCtx.currentTime;
+            this.lastTempoChangeTime = audioCtx.currentTime;  // used in case if tempo change trigger is time basis.
             this.scheduleBar();
         },
         scheduleBar() {
@@ -71,9 +74,30 @@ const vueApp = {
 
             // UI animation for dial. Should play just for the 1st bar.
             if (this.currentBar == 1) {
+                const barTime = next_bar_to_be_scheduled_in_seconds;  // time it takes to complete a bar.
+                const animationDurationInSeconds = () => {
+                    let secondsToPlay = null;
+                    switch (this.tempoChangeTrigger) {
+                        case 'second':
+                            secondsToPlay = this.tempoChangeAfterX;
+                            if (secondsToPlay % barTime)  // consider time for switching tempo at bar finish.
+                                secondsToPlay += (barTime - secondsToPlay % barTime);
+                            return secondsToPlay;
+                        case 'minute':
+                            const tempoChangeInSeconds = this.tempoChangeAfterX * 60;
+                            secondsToPlay = tempoChangeInSeconds;
+                            if (secondsToPlay % barTime)  // consider time for switching tempo at bar finish.
+                                secondsToPlay += (barTime - secondsToPlay % barTime);
+                            return secondsToPlay;
+                        case 'bar':
+                            return barTime * this.tempoChangeAfterX;
+                    }
+                };
+                const duration = animationDurationInSeconds();
+                this.barsToPlay = duration / barTime;
                 $('.dial').stop();  // in case it gets buggy, stop it first before playing.
                 $('.dial').animate({ value: 100 }, {
-                    duration: (next_bar_to_be_scheduled_in_seconds * this.jumpOnBar) * 1000,
+                    duration: duration * 1000,
                     easing: 'linear',
                     step: function () {
                         $('.dial').val(this.value).trigger('change');
@@ -88,12 +112,24 @@ const vueApp = {
         barCompleted() {
             this.currentBar += 1;
             this.scheduledBeats.splice(0, 4); // remove the played beats after a bar is over.
-            let canChangeTempo = this.currentBar == this.jumpOnBar + 1;
-            if (canChangeTempo) {
+            const canChangeTempo = () => {
+                seconds_since_first_play = audioCtx.currentTime - this.lastTempoChangeTime;
+                switch (this.tempoChangeTrigger) {
+                    case 'second':
+                        return seconds_since_first_play >= this.tempoChangeAfterX;
+                    case 'minute':
+                        return seconds_since_first_play >= this.tempoChangeAfterX * 60;
+                    case 'bar':
+                        return this.currentBar == this.tempoChangeAfterX + 1;
+                }
+            };
+            console.log(canChangeTempo(), seconds_since_first_play, this.tempoChangeAfterX);
+            if (canChangeTempo()) {
                 let updatedTempo = this.tempo + this.jumpBpm;
                 if (updatedTempo > this.endTempo)
                     updatedTempo = this.startTempo;
                 this.tempo = updatedTempo;
+                this.lastTempoChangeTime = audioCtx.currentTime;
                 this.currentBar = 1;  // also reset bar back to 1.
             }
         }

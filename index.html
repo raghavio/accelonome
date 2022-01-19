@@ -67,13 +67,19 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label for="jumpOnBar" class="col-xs-4 col-md-2 col-md-offset-3 control-label">After Every</label>
-					<div class="col-xs-5 col-sm-3 col-md-2">
-						<input type="number" class="form-control" v-model="jumpOnBar" id="jumpOnBar"
+					<label for="tempoChangeAfterX" class="col-xs-4 col-md-2 col-md-offset-3 control-label">After
+						Every</label>
+					<div class="col-xs-5 col-sm-3 col-md-1">
+						<input type="number" class="form-control" v-model="tempoChangeAfterX" id="tempoChangeAfterX"
 							:disabled="isPlaying">
 					</div>
-					<label class="col-xs-1 col-sm-1 col-md-1 control-label"
-						style="text-align: left; padding-left: 0;padding-top: 5px;">Bar</label>
+					<div class="col-xs-1 col-sm-1 col-md-2" style="text-align: left; padding-left: 0;">
+						<select class="form-control" v-model="tempoChangeTrigger" :disabled="isPlaying">
+							<option value="bar">Bars</option>
+							<option value="second">Seconds</option>
+							<option value="minute">Minutes</option>
+						</select>
+					</div>
 				</div>
 				<div class="form-group">
 					<label for="timeSig" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Time
@@ -119,8 +125,8 @@
 			<div class="row" style="margin: 35px 0 40px 0">
 				<button type="button" value="0" class="dial" @click="isPlaying ? stop() : play()"><span
 						style="color:#ffffff">{{isPlaying ? tempo : 'Start'}}</span>
-					<span v-if="isPlaying" style="font-size: 15px;color:#ffffff;"><br />Current Bar:
-						{{currentBar}}</span></button>
+					<span v-if="isPlaying" style="font-size: 15px;color:#ffffff;"><br />Bar:
+						{{currentBar}}/{{barsToPlay}}</span></button>
 			</div>
 			<footer class="footer">
 				<div class="container">
@@ -130,8 +136,8 @@
 					</div>
 					<br />
 					<p class="text-muted">Made with ❤️ (and blistered fingers 🎸) by <a
-							href="https://twitter.com/raghavio" style="color:#ffffff"><u>Raghav</u></a> and <a
-							href="https://twitter.com/antweb9" style="color:#ffffff"><u>Ananth</u></a></p>
+							href="https://twitter.com/raghavio" target="twt" style="color:#ffffff"><u>Raghav</u></a> and
+						<a href="https://twitter.com/antweb9" target="twt" style="color:#ffffff"><u>Ananth</u></a></p>
 				</div>
 			</footer>
 		</div>
