@@ -5,8 +5,10 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description"
+		content="Best metronome for your practice sessions. Support for odd time signatures and ability to increase tempo after every round.">
 	<link rel="icon" href="favicon.ico" type="image/gif" sizes="16x16">
-	<title>Accelonome</title>
+	<title>Accelonome - Accelerated metronome with time signatures.</title>
 
 	<!-- Bootstrap -->
 	<link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
@@ -42,10 +44,12 @@
 			</div>
 			<form class="form-horizontal">
 				<div class="form-group">
-					<label for="startTempo" class="col-xs-4 col-md-2 col-md-2 col-md-offset-3 control-label">Starting Tempo
-						</label>
+					<label for="startTempo" class="col-xs-4 col-md-2 col-md-2 col-md-offset-3 control-label">Starting
+						Tempo
+					</label>
 					<div class="col-xs-8 col-sm-5 col-md-3">
-						<input type="number" class="form-control" v-model="startTempo" id="startTempo" :disabled="isPlaying">
+						<input type="number" class="form-control" v-model="startTempo" id="startTempo"
+							:disabled="isPlaying">
 					</div>
 				</div>
 				<div class="form-group">
@@ -55,17 +59,21 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label for="jumpTempo" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Increase Tempo By</label>
+					<label for="jumpTempo" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Increase Tempo
+						By</label>
 					<div class="col-xs-8 col-sm-5 col-md-3">
-						<input type="number" class="form-control" v-model="jumpBpm" id="jumpTempo" :disabled="isPlaying">
+						<input type="number" class="form-control" v-model="jumpBpm" id="jumpTempo"
+							:disabled="isPlaying">
 					</div>
 				</div>
 				<div class="form-group">
 					<label for="jumpOnBar" class="col-xs-4 col-md-2 col-md-offset-3 control-label">After Every</label>
 					<div class="col-xs-5 col-sm-3 col-md-2">
-						<input type="number" class="form-control" v-model="jumpOnBar" id="jumpOnBar" :disabled="isPlaying">
+						<input type="number" class="form-control" v-model="jumpOnBar" id="jumpOnBar"
+							:disabled="isPlaying">
 					</div>
-					<label class="col-xs-1 col-sm-1 col-md-1 control-label" style="text-align: left; padding-left: 0;">Bar</label>
+					<label class="col-xs-1 col-sm-1 col-md-1 control-label"
+						style="text-align: left; padding-left: 0;padding-top: 5px;">Bar</label>
 				</div>
 				<div class="form-group">
 					<label for="timeSig" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Time
@@ -107,18 +115,27 @@
 						</select>
 					</div>
 				</div>
-				<br/>
-				<div class="form-group" style="line-height: 35px;margin-top: 140;">
-					<button type="button" value="0" class="dial" @click="isPlaying ? stop() : play()"><span
-							style="color:#ffffff">{{isPlaying ? tempo : 'Start'}}</span>
-						<span v-if="isPlaying" style="font-size: 15px;color:#ffffff;"><br />Current Bar:
-							{{currentBar}}</span></button>
+			</form>
+			<div class="row" style="margin: 35px 0 40px 0">
+				<button type="button" value="0" class="dial" @click="isPlaying ? stop() : play()"><span
+						style="color:#ffffff">{{isPlaying ? tempo : 'Start'}}</span>
+					<span v-if="isPlaying" style="font-size: 15px;color:#ffffff;"><br />Current Bar:
+						{{currentBar}}</span></button>
+			</div>
+			<footer class="footer">
+				<div class="container">
+					<div class="row">
+						<a href="https://www.buymeacoffee.com/antweb" target="lol"><img
+								src="https://img.buymeacoffee.com/button-api/?text=Buy us coffee&slug=antweb&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff"></a>
+					</div>
+					<br />
+					<p class="text-muted">Made with ❤️ (and blistered fingers 🎸) by <a
+							href="https://twitter.com/raghavio" style="color:#ffffff"><u>Raghav</u></a> and <a
+							href="https://twitter.com/antweb9" style="color:#ffffff"><u>Ananth</u></a></p>
 				</div>
+			</footer>
 		</div>
-		</form>
 	</div>
-	</div>
-
 	<script src="https://unpkg.com/vue@3.2.26/dist/vue.global.prod.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
