@@ -45,25 +45,13 @@ const vueApp = {
             if (!this.tempo)
                 this.tempo = this.startTempo;
             this.isPlaying = true;
-            this.currentBeat = 0;
             this.nextNoteTime = audioCtx.currentTime;
-            timerWorker.postMessage(["scheduleBar", 0]);
+            this.scheduleBar();
         },
         scheduleBar() {
             note_multiplier = this.note / 4;  // will give 2 for 8th note. 1 quarter note = 2 8th note.
             const secondsPerBeat = 60.0 / (this.tempo * note_multiplier);
-            if (this.currentBar == 1) {
-                $('.dial').animate({ value: 100 }, {
-                    duration: (secondsPerBeat * this.beats * this.jumpOnBar) * 1000 - 20,
-                    easing: 'linear',
-                    step: function () {
-                        $('.dial').val(this.value).trigger('change');
-                    },
-                    always: function () {
-                        $('.dial').val(0).trigger('change');
-                    }
-                });
-            }
+
             for (let beat = 1; beat <= this.beats; beat++) {
                 let osc = audioCtx.createOscillator();
                 osc.connect(audioCtx.destination);
@@ -78,8 +66,22 @@ const vueApp = {
                 this.scheduledBeats.push(osc);  // store the objects so we can stop later if required.
                 this.nextNoteTime += secondsPerBeat;
             }
-            // schedule next bar half a second before the current bar finishes.
+            // schedule next bar after this one finishes.
             next_bar_to_be_scheduled_in_seconds = (this.nextNoteTime - audioCtx.currentTime);
+
+            // UI animation for dial. Should play just for the 1st bar.
+            if (this.currentBar == 1) {
+                $('.dial').animate({ value: 100 }, {
+                    duration: (next_bar_to_be_scheduled_in_seconds * this.jumpOnBar) * 1000,
+                    easing: 'linear',
+                    step: function () {
+                        $('.dial').val(this.value).trigger('change');
+                    },
+                    always: function () {
+                        $('.dial').val(0).trigger('change');
+                    }
+                });
+            }
             timerWorker.postMessage(["scheduleBar", next_bar_to_be_scheduled_in_seconds]);
         },
         barCompleted() {
@@ -99,10 +101,7 @@ const vueApp = {
     mounted() {
         timerWorker.onmessage = (e) => {
             if (e.data == "tick") {
-                // if there were scheduled beats then that means the bar is finished.
-                // this should get run everytime except the very first time.
-                if (this.scheduledBeats.length > 0)
-                    this.barCompleted();
+                this.barCompleted();
                 this.scheduleBar();
             }
         }
