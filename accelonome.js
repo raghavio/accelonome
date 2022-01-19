@@ -71,6 +71,7 @@ const vueApp = {
 
             // UI animation for dial. Should play just for the 1st bar.
             if (this.currentBar == 1) {
+                $('.dial').stop();  // in case it gets buggy, stop it first before playing.
                 $('.dial').animate({ value: 100 }, {
                     duration: (next_bar_to_be_scheduled_in_seconds * this.jumpOnBar) * 1000,
                     easing: 'linear',
@@ -106,8 +107,8 @@ const vueApp = {
             }
         }
         $(".dial").knob({
-            width: 350,
-            height: 350,
+            width: 340,
+            height: 340,
             thickness: '0.10',
             fgColor: '#ffeb3a',
             readOnly: true,
