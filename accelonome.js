@@ -2,6 +2,7 @@ const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 const timerWorker = new Worker("worker.js");
 let playedEmptyBuffer = false;
+let SOUNDS = {};
 
 const vueApp = {
     data() {
@@ -24,6 +25,19 @@ const vueApp = {
         }
     },
     methods: {
+        loadSoundBuffers() {
+            bufferLoader = new BufferLoader(
+                audioCtx,
+                [
+                    '/assets/audio/metronome_beat_1_accent.mp3',
+                    '/assets/audio/metronome_beat_1.mp3',
+                ],
+                (bufferList) => {
+                    SOUNDS['metronome_1'] = { 'accent_beat': bufferList[0], 'normal_beat': bufferList[1] };
+                }
+            );
+            bufferLoader.load();
+        },
         stop() {
             this.currentBar = 1;
             this.isPlaying = false;
@@ -56,17 +70,16 @@ const vueApp = {
             const secondsPerBeat = 60.0 / (this.tempo * note_multiplier);
 
             for (let beat = 1; beat <= this.beats; beat++) {
-                let osc = audioCtx.createOscillator();
-                osc.connect(audioCtx.destination);
+                const source = audioCtx.createBufferSource();
+                source.connect(audioCtx.destination);
 
                 if (this.accentedBeats.includes(beat)) {
-                    osc.frequency.value = 880.0;
+                    source.buffer = SOUNDS['metronome_1']['accent_beat'];
                 } else {
-                    osc.frequency.value = 440;
+                    source.buffer = SOUNDS['metronome_1']['normal_beat'];
                 }
-                osc.start(this.nextNoteTime);
-                osc.stop(this.nextNoteTime + this.noteLength);
-                this.scheduledBeats.push(osc);  // store the objects so we can stop later if required.
+                source.start(this.nextNoteTime);
+                this.scheduledBeats.push(source);  // store the objects so we can stop later if required.
                 this.nextNoteTime += secondsPerBeat;
             }
             // schedule next bar after this one finishes.
@@ -123,7 +136,6 @@ const vueApp = {
                         return this.currentBar == this.tempoChangeAfterX + 1;
                 }
             };
-            console.log(canChangeTempo(), seconds_since_first_play, this.tempoChangeAfterX);
             if (canChangeTempo()) {
                 let updatedTempo = this.tempo + this.jumpBpm;
                 if (updatedTempo > this.endTempo)
@@ -136,6 +148,7 @@ const vueApp = {
 
     },
     mounted() {
+        this.loadSoundBuffers();
         timerWorker.onmessage = (e) => {
             if (e.data == "tick") {
                 this.barCompleted();
