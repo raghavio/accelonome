@@ -64,6 +64,9 @@ const vueApp = {
                 node.start(0);
                 playedEmptyBuffer = true;
             }
+            if (!SOUNDS[this.tickSound].buffer || !SOUNDS[this.tickSound + '_accent'].buffer)
+                return;  // sound not loaded yet. can't play.
+            
             if (!this.tempo)
                 this.tempo = this.startTempo;
             this.isPlaying = true;
@@ -151,7 +154,6 @@ const vueApp = {
                 this.currentBar = 1;  // also reset bar back to 1.
             }
         }
-
     },
     mounted() {
         this.loadSoundBuffers();
@@ -162,8 +164,8 @@ const vueApp = {
             }
         }
         $(".dial").knob({
-            width: 340,
-            height: 340,
+            width: Math.min(320, screen.width - 30),
+            height: Math.min(320, screen.width - 30),
             thickness: '0.10',
             fgColor: '#ffeb3a',
             readOnly: true,
