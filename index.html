@@ -44,32 +44,42 @@
 			</div>
 			<form class="form-horizontal">
 				<div class="form-group">
-					<label for="startTempo" class="col-xs-4 col-md-2 col-md-2 col-md-offset-3 control-label">Starting
+					<label for="startTempo" class="col-xs-5 col-md-2 col-md-2 col-md-offset-3 control-label">Starting
 						Tempo
 					</label>
-					<div class="col-xs-8 col-sm-5 col-md-3">
-						<input type="number" class="form-control" v-model="startTempo" id="startTempo"
-							:disabled="isPlaying">
+					<div class="col-xs-7 col-sm-5 col-md-3">
+						<div class="input-group">
+							<input type="number" class="form-control" v-model="startTempo" id="startTempo"
+								:disabled="isPlaying">
+							<div class="input-group-addon">BPM</div>
+						</div>
+
 					</div>
 				</div>
 				<div class="form-group">
-					<label for="endTempo" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Max Tempo</label>
-					<div class="col-xs-8 col-sm-5 col-md-3">
-						<input type="number" class="form-control" v-model="endTempo" id="endTempo">
+					<label for="endTempo" class="col-xs-5 col-md-2 col-md-offset-3 control-label">Max Tempo</label>
+					<div class="col-xs-7 col-sm-5 col-md-3">
+						<div class="input-group">
+							<input type="number" class="form-control" v-model="endTempo" id="endTempo">
+							<div class="input-group-addon">BPM</div>
+						</div>
 					</div>
 				</div>
 				<div class="form-group">
-					<label for="jumpTempo" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Increase Tempo
+					<label for="jumpTempo" class="col-xs-5 col-md-2 col-md-offset-3 control-label">Increase Tempo
 						By</label>
-					<div class="col-xs-8 col-sm-5 col-md-3">
-						<input type="number" class="form-control" v-model="jumpBpm" id="jumpTempo"
-							:disabled="isPlaying">
+					<div class="col-xs-7 col-sm-5 col-md-3">
+						<div class="input-group">
+							<input type="number" class="form-control" v-model="jumpBpm" id="jumpTempo"
+								:disabled="isPlaying">
+							<div class="input-group-addon">BPM</div>
+						</div>
 					</div>
 				</div>
 				<div class="form-group">
-					<label for="tempoChangeAfterX" class="col-xs-4 col-md-2 col-md-offset-3 control-label">After
+					<label for="tempoChangeAfterX" class="col-xs-5 col-md-2 col-md-offset-3 control-label">After
 						Every</label>
-					<div class="col-xs-4 col-sm-2 col-md-1">
+					<div class="col-xs-3 col-sm-2 col-md-1">
 						<input type="number" class="form-control" v-model="tempoChangeAfterX" id="tempoChangeAfterX"
 							:disabled="isPlaying">
 					</div>
@@ -82,9 +92,9 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label for="timeSig" class="col-xs-4 col-md-2 col-md-offset-3 control-label">Time
+					<label for="timeSig" class="col-xs-5 col-md-2 col-md-offset-3 control-label">Time
 						Signature</label>
-					<div class="col-xs-4 col-sm-2 col-md-1">
+					<div class="col-xs-3 col-sm-2 col-md-1">
 						<select class="form-control" v-model.number="beats" :disabled="isPlaying" id="timeSig">
 							<option value="1">1</option>
 							<option value="2">2</option>
@@ -104,7 +114,8 @@
 							<option value="16">16</option>
 						</select>
 					</div>
-					<div class="col-xs-4 col-sm-2 col-md-1">
+					<span style="position: relative;float:left;font-size: 25px">/</span>
+					<div class="col-xs-3 col-sm-2 col-md-1">
 						<select class="form-control" v-model="note" :disabled="isPlaying">
 							<option value="2">2</option>
 							<option value="4">4</option>
@@ -114,12 +125,29 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<div class="col-xs-offset-4 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-5 col-md-2">
+					<div class="col-xs-offset-5 col-xs-5 col-sm-offset-5 col-sm-3 col-md-offset-5 col-md-2">
 						<select class="selectpicker form-control" multiple title="Accent beats"
 							data-selected-text-format="static" mobile=true v-model="accentedBeats">
 							<option v-for="beat in beats" :value=beat :key="beat">{{beat}}</option>
 						</select>
 					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-xs-5 col-md-2 col-md-offset-3 control-label">Sound</label>
+					<div class="col-xs-3 col-sm-3 col-md-3 col-lg-2">
+					<label class="radio-inline">
+						<input type="radio" v-model="tickSound" value="metronome_1"> 1
+					</label>
+					<label class="radio-inline">
+						<input type="radio" v-model="tickSound" value="metronome_2"> 2
+					</label>
+					<label class="radio-inline">
+						<input type="radio" v-model="tickSound"  value="metronome_3"> 3
+					</label>
+					<label class="radio-inline">
+						<input type="radio" v-model="tickSound" value="metronome_4"> 4
+					</label>
+				</div>
 				</div>
 			</form>
 			<div class="row" style="margin: 35px 0 40px 0">
@@ -150,7 +178,6 @@
 		crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
 	<script src="https://unpkg.com/jquery-knob@1.2.11/dist/jquery.knob.min.js"></script>
-	<script src="buffer-loader.js"></script>
 	<script src="accelonome.js"></script>
 </body>
 
