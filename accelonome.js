@@ -19,6 +19,7 @@ const vueApp = {
             tempoChangeTrigger: 'bar', // tempo should get changed on Bar by default.
             lastTempoChangeTime: null, // time when user clicked play.
             tickSound: "metronome_1",
+            vibrateOn: false,
         }
     },
     methods: {
@@ -35,6 +36,8 @@ const vueApp = {
             });
             this.scheduledBeats = [];
             $('.dial').stop();
+            if (this.vibrateOn)
+                navigator.vibrate(0);
         },
         play() {
             if (!playedEmptyBuffer) {
@@ -48,7 +51,7 @@ const vueApp = {
             }
             if (!SOUNDS[this.tickSound].buffer || !SOUNDS[this.tickSound + '_accent'].buffer)
                 return;  // sound not loaded yet. can't play.
-            
+
             if (!this.tempo) {
                 this.tempo = this.startTempo;
                 this.userEnteredTempo = this.startTempo;
@@ -121,7 +124,7 @@ const vueApp = {
                 }
                 navigator.vibrate(vibrationPatterns);
             }
-            // scheduling next bar 300ms before its time.
+            // scheduling trigger for next bar 300ms before its time.
             timerWorker.postMessage({ eventName: "scheduleBar", inSeconds: next_bar_to_be_scheduled_in_seconds - 0.3 });
         },
         barCompleted() {
