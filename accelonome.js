@@ -113,7 +113,16 @@ const vueApp = {
                     }
                 });
             }
-            timerWorker.postMessage({ eventName: "scheduleBar", inSeconds: next_bar_to_be_scheduled_in_seconds });
+            // schedule vibration pattern
+            if (this.vibrateOn) {
+                let vibrationPatterns = [];
+                for (let beat = 1; beat <= this.beats; beat++) {
+                    vibrationPatterns.push(50, (secondsPerBeat - 0.05) * 1000);
+                }
+                navigator.vibrate(vibrationPatterns);
+            }
+            // scheduling next bar 300ms before its time.
+            timerWorker.postMessage({ eventName: "scheduleBar", inSeconds: next_bar_to_be_scheduled_in_seconds - 0.3 });
         },
         barCompleted() {
             this.currentBar += 1;
