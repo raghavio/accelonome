@@ -9,24 +9,23 @@
 		content="Best metronome for your practice sessions. Support for odd time signatures and ability to increase tempo after every round.">
 	<link rel="icon" href="favicon.ico" type="image/gif" sizes="16x16">
 	<title>Accelonome - Accelerated metronome with time signatures.</title>
-
-	<!-- Initiate downloading sounds first -->
-	<script async src="sounds.js"></script>
-
 	<!-- Bootstrap -->
-	<link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
 		integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-	<link rel="stylesheet"
-		href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+	<link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css"
+		as="style" onload="this.onload=null;this.rel='stylesheet'">
+	<noscript>
+		<link rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+	</noscript>
 </head>
 
-<body style="background-color: #000000;color: #ffffff;">
+<body style="background-color: #000000;color: #ffffff; font-family: Verdana, Geneva, Tahoma, sans-serif;">
 	<div id="vue-app" class="container">
 		<div class="text-center">
 			<div class="page-header">
-				<img src="header_icon.png" alt="Accelonome Logo" style="vertical-align:middle" />
-				<span style="font-family: 'Amatic SC', cursive; font-size: 45px">Accelonome</span>
+				<img src="header_icon.png" alt="Accelonome Logo" width=128 height=128 style="vertical-align:middle" />
+				<span style="font-family:'Courier New', Courier, monospace; font-size: 45px">Accelonome</span>
 			</div>
 			<form class="form-horizontal">
 				<div class="form-group">
@@ -39,7 +38,6 @@
 								:disabled="isPlaying">
 							<div class="input-group-addon">BPM</div>
 						</div>
-
 					</div>
 				</div>
 				<div class="form-group">
@@ -161,6 +159,7 @@
 			</footer>
 		</div>
 	</div>
+	<script src="sounds.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
 		integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
