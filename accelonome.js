@@ -1,4 +1,3 @@
-const timerWorker = new Worker("worker.js");
 let playedEmptyBuffer = false;
 
 const vueApp = {
@@ -149,6 +148,7 @@ const vueApp = {
             readOnly: true,
             bgColor: '#2295f1'
         });
+        loadOtherSounds();  // once vue is loaded. download other sounds.
     },
     watch: {
         //  bootstrap-select doesn't auto update on its own.

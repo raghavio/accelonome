@@ -12,10 +12,27 @@ const SOUNDS = {
     "metronome_4": { "path": "/assets/audio/metronome_beat_4.wav", "buffer": null },
 };
 
-for (const [sound_name, data] of Object.entries(SOUNDS)) {
+const DEFAULT_SOUNDS = new Set(["metronome_1_accent", "metronome_1"]);
+
+function loadSound(soundName) {
+    data = SOUNDS[soundName];
     fetch(data.path).then((resp) => {
         return resp.arrayBuffer();
     }).then((buffer) => {
-        audioCtx.decodeAudioData(buffer, (decodedData) => SOUNDS[sound_name]["buffer"] = decodedData);
+        audioCtx.decodeAudioData(buffer, (decodedData) => SOUNDS[soundName]["buffer"] = decodedData);
     });
-};
+}
+
+function loadDefaultSound() {
+    DEFAULT_SOUNDS.forEach((sound) => loadSound(sound));
+}
+
+function loadOtherSounds() {
+    const OTHER_SOUNDS = Object.keys(SOUNDS).filter(x => !DEFAULT_SOUNDS.has(x));
+    OTHER_SOUNDS.forEach((sound) => loadSound(sound));
+}
+
+loadDefaultSound();
+// loading this here so it downloads the script quickly and I have my worker initiated when user clicks start.
+// a hack until I introduce webpack/bundler to reduce resource requests on website load.
+const timerWorker = new Worker("worker.js");
