@@ -22,6 +22,10 @@ const vueApp = {
         }
     },
     methods: {
+        reset() {
+            this.stop();
+            this.tempo = this.startTempo;
+        },
         stop() {
             this.currentBar = 1;
             this.isPlaying = false;
@@ -45,8 +49,10 @@ const vueApp = {
             if (!SOUNDS[this.tickSound].buffer || !SOUNDS[this.tickSound + '_accent'].buffer)
                 return;  // sound not loaded yet. can't play.
             
-            if (!this.tempo)
+            if (!this.tempo) {
                 this.tempo = this.startTempo;
+                this.userEnteredTempo = this.startTempo;
+            }
             this.isPlaying = true;
             this.nextNoteTime = audioCtx.currentTime;
             this.lastTempoChangeTime = audioCtx.currentTime;  // used in case if tempo change trigger is time basis.
@@ -141,8 +147,8 @@ const vueApp = {
             }
         }
         $(".dial").knob({
-            width: Math.min(320, screen.width - 30),
-            height: Math.min(320, screen.width - 30),
+            width: Math.min(320, document.getElementById("playButtons").offsetWidth - 30),
+            height: Math.min(320, document.getElementById("playButtons").offsetWidth - 30),
             thickness: '0.10',
             fgColor: '#ffeb3a',
             readOnly: true,

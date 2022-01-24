@@ -21,144 +21,148 @@
 </head>
 
 <body style="background-color: #000000;color: #ffffff; font-family: Verdana, Geneva, Tahoma, sans-serif;">
-	<div id="vue-app" class="container">
-		<div class="text-center">
-			<div class="page-header">
-				<img src="header_icon.png" alt="Accelonome Logo" width=128 height=128 style="vertical-align:middle" />
-				<span style="font-family:'Courier New', Courier, monospace; font-size: 45px">Accelonome</span>
-			</div>
-			<form class="form-horizontal">
-				<div class="form-group">
-					<label for="startTempo" class="col-xs-5 col-md-2 col-md-2 col-md-offset-3 control-label">Starting
-						Tempo
-					</label>
-					<div class="col-xs-7 col-sm-5 col-md-3">
-						<div class="input-group">
-							<input type="number" class="form-control" v-model="startTempo" id="startTempo"
-								:disabled="isPlaying">
-							<div class="input-group-addon">BPM</div>
-						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="endTempo" class="col-xs-5 col-md-2 col-md-offset-3 control-label">Max Tempo</label>
-					<div class="col-xs-7 col-sm-5 col-md-3">
-						<div class="input-group">
-							<input type="number" class="form-control" v-model="endTempo" id="endTempo">
-							<div class="input-group-addon">BPM</div>
-						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="jumpTempo" class="col-xs-5 col-md-2 col-md-offset-3 control-label">Increase Tempo
-						By</label>
-					<div class="col-xs-7 col-sm-5 col-md-3">
-						<div class="input-group">
-							<input type="number" class="form-control" v-model="jumpBpm" id="jumpTempo"
-								:disabled="isPlaying">
-							<div class="input-group-addon">BPM</div>
-						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="tempoChangeAfterX" class="col-xs-5 col-md-2 col-md-offset-3 control-label">After
-						Every</label>
-					<div class="col-xs-3 col-sm-2 col-md-1">
-						<input type="number" class="form-control" v-model="tempoChangeAfterX" id="tempoChangeAfterX"
+	<main id="vue-app" class="container">
+		<header class="page-header text-center">
+			<img src="header_icon.png" alt="An image of metronome" width=128 height=128 style="vertical-align:middle" />
+			<span style="font-family:'Courier New', Courier, monospace; font-size: 45px">Accelonome</span>
+		</header>
+		<form class="form-horizontal col-sm-offset-2 col-sm-10 col-md-offset-1 col-md-5">
+			<div class="form-group">
+				<label for="startTempo" class="col-xs-4 col-md-5 control-label">Starting
+					Tempo
+				</label>
+				<div class="col-xs-8 col-sm-5 col-md-7">
+					<div class="input-group">
+						<input type="number" class="form-control" v-model="startTempo" id="startTempo"
 							:disabled="isPlaying">
-					</div>
-					<div class="col-xs-4 col-sm-2 col-md-2" style="text-align: left; padding-left: 0;">
-						<select class="form-control" v-model="tempoChangeTrigger" :disabled="isPlaying">
-							<option value="bar">Bars</option>
-							<option value="second">Seconds</option>
-							<option value="minute">Minutes</option>
-						</select>
+						<div class="input-group-addon">BPM</div>
 					</div>
 				</div>
-				<div class="form-group">
-					<label for="timeSig" class="col-xs-5 col-md-2 col-md-offset-3 control-label">Time
-						Signature</label>
-					<div class="col-xs-3 col-sm-2 col-md-1">
-						<select class="form-control" style="padding-right: 0px;" v-model.number="beats"
-							:disabled="isPlaying" id="timeSig">
-							<option value="1">1</option>
-							<option value="2">2</option>
-							<option value="3">3</option>
-							<option value="4">4</option>
-							<option value="5">5</option>
-							<option value="6">6</option>
-							<option value="7">7</option>
-							<option value="8">8</option>
-							<option value="9">9</option>
-							<option value="10">10</option>
-							<option value="11">11</option>
-							<option value="12">12</option>
-							<option value="13">13</option>
-							<option value="14">14</option>
-							<option value="15">15</option>
-							<option value="16">16</option>
-						</select>
-					</div>
-					<span style="position: relative;float:left;font-size: 25px">/</span>
-					<div class="col-xs-3 col-sm-2 col-md-1">
-						<select class="form-control" style="padding-right: 0px;" v-model="note" :disabled="isPlaying">
-							<option value="2">2</option>
-							<option value="4">4</option>
-							<option value="8">8</option>
-							<option value="16">16</option>
-						</select>
+			</div>
+			<div class="form-group">
+				<label for="endTempo" class="col-xs-4 col-md-5 control-label">Max Tempo</label>
+				<div class="col-xs-8 col-sm-5 col-md-7">
+					<div class="input-group">
+						<input type="number" class="form-control" v-model="endTempo" id="endTempo">
+						<div class="input-group-addon">BPM</div>
 					</div>
 				</div>
-				<div class="form-group">
-					<div class="col-xs-offset-5 col-xs-5 col-sm-offset-5 col-sm-3 col-md-offset-5 col-md-2">
-						<select class="selectpicker form-control" multiple title="Accent beats"
-							data-selected-text-format="static" mobile=true v-model="accentedBeats">
-							<option v-for="beat in beats" :value=beat :key="beat">{{beat}}</option>
-						</select>
+			</div>
+			<div class="form-group">
+				<label for="jumpTempo" class="col-xs-4 col-md-5 control-label">Increase Tempo
+					By</label>
+				<div class="col-xs-8 col-sm-5 col-md-7">
+					<div class="input-group">
+						<input type="number" class="form-control" v-model="jumpBpm" id="jumpTempo"
+							:disabled="isPlaying">
+						<div class="input-group-addon">BPM</div>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="col-xs-5 col-md-2 col-md-offset-3 control-label">Sound</label>
-					<div class="col-xs-6 col-sm-3 col-md-3 col-lg-2">
-						<label class="radio-inline">
-							<input type="radio" v-model="tickSound" value="metronome_1"> 1
-						</label>
-						<label class="radio-inline">
-							<input type="radio" v-model="tickSound" value="metronome_2"> 2
-						</label>
-						<label class="radio-inline">
-							<input type="radio" v-model="tickSound" value="metronome_3"> 3
-						</label>
-						<label class="radio-inline">
-							<input type="radio" v-model="tickSound" value="metronome_4"> 4
-						</label>
-					</div>
+			</div>
+			<div class="form-group">
+				<label for="tempoChangeAfterX" class="col-xs-4 col-md-5 control-label">After
+					Every</label>
+				<div class="col-xs-3 col-sm-2 col-md-3">
+					<input type="number" class="form-control" v-model="tempoChangeAfterX" id="tempoChangeAfterX"
+						:disabled="isPlaying">
 				</div>
-			</form>
-			<div class="row" style="margin: 35px 0 40px 0">
+				<div class="col-xs-4 col-sm-2 col-md-4" style="text-align: left; padding-left: 0;">
+					<select class="form-control" v-model="tempoChangeTrigger" :disabled="isPlaying">
+						<option value="bar">Bars</option>
+						<option value="second">Seconds</option>
+						<option value="minute">Minutes</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="timeSig" class="col-xs-4 col-md-5 control-label">Time
+					Signature</label>
+				<div class="col-xs-3 col-sm-2 col-md-3">
+					<select class="form-control" style="padding-right: 0px;" v-model.number="beats"
+						:disabled="isPlaying" id="timeSig">
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3</option>
+						<option value="4">4</option>
+						<option value="5">5</option>
+						<option value="6">6</option>
+						<option value="7">7</option>
+						<option value="8">8</option>
+						<option value="9">9</option>
+						<option value="10">10</option>
+						<option value="11">11</option>
+						<option value="12">12</option>
+						<option value="13">13</option>
+						<option value="14">14</option>
+						<option value="15">15</option>
+						<option value="16">16</option>
+					</select>
+				</div>
+				<span style="position: relative;float:left;font-size: 25px">/</span>
+				<div class="col-xs-3 col-sm-2 col-md-3">
+					<select class="form-control" style="padding-right: 0px;" v-model="note" :disabled="isPlaying">
+						<option value="2">2</option>
+						<option value="4">4</option>
+						<option value="8">8</option>
+						<option value="16">16</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-xs-offset-4 col-xs-4 col-sm-3 col-md-offset-5" style="width:160px">
+					<select class="selectpicker form-control" multiple title="Accent beats"
+						data-selected-text-format="static" mobile=true v-model="accentedBeats">
+						<option v-for="beat in beats" :value=beat :key="beat">{{beat}}</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 col-md-5 control-label">Sound</label>
+				<div class="col-xs-8 col-md-7">
+					<label class="radio-inline">
+						<input type="radio" v-model="tickSound" value="metronome_1"> 1
+					</label>
+					<label class="radio-inline">
+						<input type="radio" v-model="tickSound" value="metronome_2"> 2
+					</label>
+					<label class="radio-inline">
+						<input type="radio" v-model="tickSound" value="metronome_3"> 3
+					</label>
+					<label class="radio-inline">
+						<input type="radio" v-model="tickSound" value="metronome_4"> 4
+					</label>
+				</div>
+			</div>
+			<br/>
+		</form>
+		<div id="playButtons" class="col-md-6">
+			<div class="col-xs-12 col-sm-12 col-md-12">
+				<button type="button" class="btn btn-danger btn-xs" style="float: right;" @click=reset>Reset
+					tempo</button>
+			</div>
+			<div class="text-center">
 				<button type="button" value="0" class="dial" @click="isPlaying ? stop() : play()"><span
 						style="color:#ffffff">{{isPlaying ? tempo : 'Start'}}</span>
 					<span v-if="isPlaying" style="font-size: 15px;color:#ffffff;"><br />Bar:
 						{{currentBar}}/{{barsToPlay}}</span></button>
 			</div>
-			<footer class="footer">
-				<div class="container">
-					<div class="row">
-						<h5>If you liked this,</h4>
-							<a href="https://www.buymeacoffee.com/antweb" target="_blank">
-								<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png"
-									alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;">
-							</a>
-					</div>
-					<br />
-					<p class="text-muted">Made with ❤️ (and blistered fingers 🎸) by <a
-							href="https://twitter.com/raghavio" target="twt" style="color:#ffffff"><u>Raghav</u></a> and
-						<a href="https://twitter.com/antweb9" target="twt" style="color:#ffffff"><u>Ananth</u></a>
-					</p>
-				</div>
-			</footer>
+			<br/>
 		</div>
-	</div>
+		<footer class="col-md-12 text-center">
+			<br/>
+			<h5>If you liked this,</h4>
+				<a href="https://www.buymeacoffee.com/antweb" target="_blank">
+					<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png"
+						alt="Support us by buying a coffee" style="height: 60px !important;width: 217px !important;">
+				</a>
+				<br />
+				<br/>
+				<p class="text-muted">Made with ❤️ (and blistered fingers 🎸) by <a href="https://twitter.com/raghavio"
+						target="twt" style="color:#ffffff"><u>Raghav</u></a> and
+					<a href="https://twitter.com/antweb9" target="twt" style="color:#ffffff"><u>Ananth</u></a>
+				</p>
+		</footer>
+	</main>
 	<script src="sounds.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
