@@ -132,8 +132,13 @@
 						<input type="radio" v-model="tickSound" value="metronome_4"> 4
 					</label>
 				</div>
+				<div class="col-xs-offset-4 col-xs-8 col-md-offset-5 col-md-7">
+					<label>
+						<input type="checkbox" v-model="vibrateOn"> Vibrate
+					</label>
+				</div>
 			</div>
-			<br/>
+			<br />
 		</form>
 		<div id="playButtons" class="col-md-6">
 			<div class="col-xs-12 col-sm-12 col-md-12">
@@ -146,17 +151,17 @@
 					<span v-if="isPlaying" style="font-size: 15px;color:#ffffff;"><br />Bar:
 						{{currentBar}}/{{barsToPlay}}</span></button>
 			</div>
-			<br/>
+			<br />
 		</div>
 		<footer class="col-md-12 text-center">
-			<br/>
+			<br />
 			<h5>If you liked this,</h4>
 				<a href="https://www.buymeacoffee.com/antweb" target="_blank">
 					<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png"
 						alt="Support us by buying a coffee" style="height: 60px !important;width: 217px !important;">
 				</a>
 				<br />
-				<br/>
+				<br />
 				<p class="text-muted">Made with ❤️ (and blistered fingers 🎸) by <a href="https://twitter.com/raghavio"
 						target="twt" style="color:#ffffff"><u>Raghav</u></a> and
 					<a href="https://twitter.com/antweb9" target="twt" style="color:#ffffff"><u>Ananth</u></a>
