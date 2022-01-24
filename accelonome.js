@@ -120,7 +120,7 @@ const vueApp = {
             if (this.vibrateOn) {
                 let vibrationPatterns = [];
                 for (let beat = 1; beat <= this.beats; beat++) {
-                    vibrationPatterns.push(200, (secondsPerBeat - 0.2) * 1000);
+                    vibrationPatterns.push(50, (secondsPerBeat - 0.05) * 1000);
                 }
                 navigator.vibrate(vibrationPatterns);
             }
