@@ -69,7 +69,8 @@ const vueApp = {
             this.lastTempoChangeTime = audioCtx.currentTime;  // used in case if tempo change trigger is time basis.
             this.scheduleBar();
             this.performKnobAnimation();
-            this.scheduleVibration();
+            if (this.vibrateOn)
+                this.scheduleVibration();
         },
         scheduleBar() {
             for (let beat = 1; beat <= this.beats; beat++) {
@@ -184,7 +185,8 @@ const vueApp = {
                     break;
                 case "barCompleted":
                     this.uiVariablesUpdate();
-                    this.scheduleVibration();
+                    if (this.vibrateOn)
+                        this.scheduleVibration();
                     const isFirstBar = this.currentBar == 1;
                     if (isFirstBar) {
                         this.performKnobAnimation();
