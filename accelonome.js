@@ -23,7 +23,8 @@ const vueApp = {
             tickSound: "metronome_1",
             vibrateOn: false,
             reverseEnabled: false,
-            isReversing: false
+            isReversing: false,
+            shouldAccelerate: true,
         }
     },
     methods: {
@@ -33,17 +34,17 @@ const vueApp = {
             this.tempoUI = this.tempo;
         },
         stop() {
+            timerWorker.postMessage({ eventName: "clearTimeout" });
             this.currentBar = 1;
             this.currentBarUI = this.currentBar;
             this.isPlaying = false;
-            timerWorker.postMessage({ eventName: "clearTimeout" });
             this.scheduledBeats.forEach(osc => {
                 osc.stop();
             });
             this.scheduledBeats = [];
-            $('.dial').stop();
             if (this.vibrateOn)
                 navigator.vibrate(0);
+            $('.dial').stop();
         },
         play() {
             if (!playedEmptyBuffer) {
@@ -92,6 +93,8 @@ const vueApp = {
             timerWorker.postMessage({ eventName: "barCompleted", inSeconds: barFinishTimeInSeconds });
         },
         performKnobAnimation() {
+            if (!this.shouldAccelerate)  // the animation is for tempo change indication. no need if not accelerating.
+                return;
             // UI animation for dial. Should play just for the 1st bar.
             const barTime = this.secondsPerBeat * this.beats;  // time it takes to complete a bar.
             const animationDurationInSeconds = () => {
@@ -137,6 +140,8 @@ const vueApp = {
             this.currentBar += 1;
             this.scheduledBeats.splice(0, 4); // remove the played beats after a bar is over.
             const canChangeTempo = () => {
+                if (!this.shouldAccelerate)
+                    return false;
                 seconds_since_first_play = audioCtx.currentTime - this.lastTempoChangeTime;
                 switch (this.tempoChangeTrigger) {
                     case 'second':
