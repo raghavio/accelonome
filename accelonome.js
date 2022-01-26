@@ -28,9 +28,11 @@ const vueApp = {
         reset() {
             this.stop();
             this.tempo = this.startTempo;
+            this.tempoUI = this.tempo;
         },
         stop() {
             this.currentBar = 1;
+            this.currentBarUI = this.currentBar;
             this.isPlaying = false;
             timerWorker.postMessage({ eventName: "clearTimeout" });
             this.scheduledBeats.forEach(osc => {
@@ -53,13 +55,13 @@ const vueApp = {
             }
             if (!SOUNDS[this.tickSound].buffer || !SOUNDS[this.tickSound + '_accent'].buffer)
                 return;  // sound not loaded yet. can't play.
+            this.isPlaying = true;
 
             if (!this.tempo) {
                 this.tempo = this.startTempo;
-                this.tempoUI = this.tempo;
+                this.tempoUI = this.startTempo;
                 this.userEnteredTempo = this.startTempo;
             }
-            this.isPlaying = true;
             this.nextNoteTime = audioCtx.currentTime;
             this.lastTempoChangeTime = audioCtx.currentTime;  // used in case if tempo change trigger is time basis.
             this.scheduleBar();
@@ -109,7 +111,7 @@ const vueApp = {
                 }
             };
             const duration = animationDurationInSeconds();
-            this.barsToPlay = duration / barTime;
+            this.barsToPlay = Math.round(duration / barTime);
             $('.dial').stop();  // in case it gets buggy, stop it first before playing.
             $('.dial').animate({ value: 100 }, {
                 duration: duration * 1000,
@@ -198,6 +200,7 @@ const vueApp = {
         },
         startTempo: function (newValues, oldValues) {
             this.tempo = this.startTempo;  // set new tempo only when startTempo's value changes.
+            this.tempoUI = this.tempo;
         }
     }
 }
