@@ -5,12 +5,14 @@ const vueApp = {
         return {
             isPlaying: false,
             startTempo: 100,
+            tempoUI: null,
             tempo: null,
             endTempo: 180,
             jumpBpm: 10,
             tempoChangeAfterX: 4,  // value of the tempo change trigger. could be number of bars, seconds or minutes.
             noteLength: 0.05,
             nextNoteTime: 0,
+            currentBarUI: 1,
             currentBar: 1,
             scheduledBeats: [],
             note: 4,  // default to quarter note.
@@ -30,7 +32,7 @@ const vueApp = {
         stop() {
             this.currentBar = 1;
             this.isPlaying = false;
-            timerWorker.postMessage({ eventName: "stop" });
+            timerWorker.postMessage({ eventName: "clearTimeout" });
             this.scheduledBeats.forEach(osc => {
                 osc.stop();
             });
@@ -54,17 +56,17 @@ const vueApp = {
 
             if (!this.tempo) {
                 this.tempo = this.startTempo;
+                this.tempoUI = this.tempo;
                 this.userEnteredTempo = this.startTempo;
             }
             this.isPlaying = true;
             this.nextNoteTime = audioCtx.currentTime;
             this.lastTempoChangeTime = audioCtx.currentTime;  // used in case if tempo change trigger is time basis.
             this.scheduleBar();
+            this.performKnobAnimation();
+            this.scheduleVibration();
         },
         scheduleBar() {
-            note_multiplier = this.note / 4;  // will give 2 for 8th note. 1 quarter note = 2 8th note.
-            const secondsPerBeat = 60.0 / (this.tempo * note_multiplier);
-
             for (let beat = 1; beat <= this.beats; beat++) {
                 const source = audioCtx.createBufferSource();
                 source.connect(audioCtx.destination);
@@ -76,56 +78,56 @@ const vueApp = {
                 }
                 source.start(this.nextNoteTime);
                 this.scheduledBeats.push(source);  // store the objects so we can stop later if required.
-                this.nextNoteTime += secondsPerBeat;
+                this.nextNoteTime += this.secondsPerBeat;
             }
-            // schedule next bar after this one finishes.
-            next_bar_to_be_scheduled_in_seconds = (this.nextNoteTime - audioCtx.currentTime);
-
-            // UI animation for dial. Should play just for the 1st bar.
-            if (this.currentBar == 1) {
-                const barTime = next_bar_to_be_scheduled_in_seconds;  // time it takes to complete a bar.
-                const animationDurationInSeconds = () => {
-                    let secondsToPlay = null;
-                    switch (this.tempoChangeTrigger) {
-                        case 'second':
-                            secondsToPlay = this.tempoChangeAfterX;
-                            if (secondsToPlay % barTime)  // consider time for switching tempo at bar finish.
-                                secondsToPlay += (barTime - secondsToPlay % barTime);
-                            return secondsToPlay;
-                        case 'minute':
-                            const tempoChangeInSeconds = this.tempoChangeAfterX * 60;
-                            secondsToPlay = tempoChangeInSeconds;
-                            if (secondsToPlay % barTime)  // consider time for switching tempo at bar finish.
-                                secondsToPlay += (barTime - secondsToPlay % barTime);
-                            return secondsToPlay;
-                        case 'bar':
-                            return barTime * this.tempoChangeAfterX;
-                    }
-                };
-                const duration = animationDurationInSeconds();
-                this.barsToPlay = duration / barTime;
-                $('.dial').stop();  // in case it gets buggy, stop it first before playing.
-                $('.dial').animate({ value: 100 }, {
-                    duration: duration * 1000,
-                    easing: 'linear',
-                    step: function () {
-                        $('.dial').val(this.value).trigger('change');
-                    },
-                    always: function () {
-                        $('.dial').val(0).trigger('change');
-                    }
-                });
-            }
-            // schedule vibration pattern
-            if (this.vibrateOn) {
-                let vibrationPatterns = [];
-                for (let beat = 1; beat <= this.beats; beat++) {
-                    vibrationPatterns.push(50, (secondsPerBeat - 0.05) * 1000);
-                }
-                navigator.vibrate(vibrationPatterns);
-            }
+            const barFinishTimeInSeconds = (this.nextNoteTime - audioCtx.currentTime);
             // scheduling trigger for next bar 300ms before its time.
-            timerWorker.postMessage({ eventName: "scheduleBar", inSeconds: next_bar_to_be_scheduled_in_seconds - 0.3 });
+            const next_bar_to_be_scheduled_in_seconds = barFinishTimeInSeconds - 0.3;
+
+            timerWorker.postMessage({ eventName: "scheduleBar", inSeconds: next_bar_to_be_scheduled_in_seconds });
+            timerWorker.postMessage({ eventName: "barCompleted", inSeconds: barFinishTimeInSeconds });
+        },
+        performKnobAnimation() {
+            // UI animation for dial. Should play just for the 1st bar.
+            const barTime = this.secondsPerBeat * this.beats;  // time it takes to complete a bar.
+            const animationDurationInSeconds = () => {
+                let secondsToPlay = null;
+                switch (this.tempoChangeTrigger) {
+                    case 'second':
+                        secondsToPlay = this.tempoChangeAfterX;
+                        if (secondsToPlay % barTime)  // consider time for switching tempo at bar finish.
+                            secondsToPlay += (barTime - secondsToPlay % barTime);
+                        return secondsToPlay;
+                    case 'minute':
+                        const tempoChangeInSeconds = this.tempoChangeAfterX * 60;
+                        secondsToPlay = tempoChangeInSeconds;
+                        if (secondsToPlay % barTime)  // consider time for switching tempo at bar finish.
+                            secondsToPlay += (barTime - secondsToPlay % barTime);
+                        return secondsToPlay;
+                    case 'bar':
+                        return barTime * this.tempoChangeAfterX;
+                }
+            };
+            const duration = animationDurationInSeconds();
+            this.barsToPlay = duration / barTime;
+            $('.dial').stop();  // in case it gets buggy, stop it first before playing.
+            $('.dial').animate({ value: 100 }, {
+                duration: duration * 1000,
+                easing: 'linear',
+                step: function () {
+                    $('.dial').val(this.value).trigger('change');
+                },
+                always: function () {
+                    $('.dial').val(0).trigger('change');
+                }
+            });
+        },
+        scheduleVibration() {
+            let vibrationPatterns = [];
+            for (let beat = 1; beat <= this.beats; beat++) {
+                vibrationPatterns.push(50, (this.secondsPerBeat - 0.05) * 1000);
+            }
+            navigator.vibrate(vibrationPatterns);
         },
         barCompleted() {
             this.currentBar += 1;
@@ -149,13 +151,27 @@ const vueApp = {
                 this.lastTempoChangeTime = audioCtx.currentTime;
                 this.currentBar = 1;  // also reset bar back to 1.
             }
+        },
+        uiVariablesUpdate() {
+            this.tempoUI = this.tempo;
+            this.currentBarUI = this.currentBar;
         }
     },
     mounted() {
         timerWorker.onmessage = (e) => {
-            if (e.data == "tick") {
-                this.barCompleted();
-                this.scheduleBar();
+            switch (e.data) {
+                case "scheduleBar":
+                    this.barCompleted();
+                    this.scheduleBar();
+                    break;
+                case "barCompleted":
+                    this.uiVariablesUpdate();
+                    this.scheduleVibration();
+                    const isFirstBar = this.currentBar == 1;
+                    if (isFirstBar) {
+                        this.performKnobAnimation();
+                    }
+                    break;
             }
         }
         $(".dial").knob({
@@ -167,6 +183,13 @@ const vueApp = {
             bgColor: '#2295f1'
         });
         loadOtherSounds();  // once vue is loaded. download other sounds.
+    },
+    computed: {
+        secondsPerBeat: function () {
+            const note_multiplier = this.note / 4;  // will give 2 for 8th note. ex: 1 quarter note = 2 8th note.
+            const secondsPerBeat = 60.0 / (this.tempo * note_multiplier);
+            return secondsPerBeat;
+        }
     },
     watch: {
         //  bootstrap-select doesn't auto update on its own.
