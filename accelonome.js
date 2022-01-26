@@ -22,6 +22,9 @@ const vueApp = {
             lastTempoChangeTime: null, // time when user clicked play.
             tickSound: "metronome_1",
             vibrateOn: false,
+            reverseEnabled: false,
+            isReversing: false,
+            shouldAccelerate: true,
         }
     },
     methods: {
@@ -31,17 +34,17 @@ const vueApp = {
             this.tempoUI = this.tempo;
         },
         stop() {
+            timerWorker.postMessage({ eventName: "clearTimeout" });
             this.currentBar = 1;
             this.currentBarUI = this.currentBar;
             this.isPlaying = false;
-            timerWorker.postMessage({ eventName: "clearTimeout" });
             this.scheduledBeats.forEach(osc => {
                 osc.stop();
             });
             this.scheduledBeats = [];
-            $('.dial').stop();
             if (this.vibrateOn)
                 navigator.vibrate(0);
+            $('.dial').stop();
         },
         play() {
             if (!playedEmptyBuffer) {
@@ -66,7 +69,8 @@ const vueApp = {
             this.lastTempoChangeTime = audioCtx.currentTime;  // used in case if tempo change trigger is time basis.
             this.scheduleBar();
             this.performKnobAnimation();
-            this.scheduleVibration();
+            if (this.vibrateOn)
+                this.scheduleVibration();
         },
         scheduleBar() {
             for (let beat = 1; beat <= this.beats; beat++) {
@@ -90,6 +94,8 @@ const vueApp = {
             timerWorker.postMessage({ eventName: "barCompleted", inSeconds: barFinishTimeInSeconds });
         },
         performKnobAnimation() {
+            if (!this.shouldAccelerate)  // the animation is for tempo change indication. no need if not accelerating.
+                return;
             // UI animation for dial. Should play just for the 1st bar.
             const barTime = this.secondsPerBeat * this.beats;  // time it takes to complete a bar.
             const animationDurationInSeconds = () => {
@@ -135,6 +141,8 @@ const vueApp = {
             this.currentBar += 1;
             this.scheduledBeats.splice(0, 4); // remove the played beats after a bar is over.
             const canChangeTempo = () => {
+                if (!this.shouldAccelerate)
+                    return false;
                 seconds_since_first_play = audioCtx.currentTime - this.lastTempoChangeTime;
                 switch (this.tempoChangeTrigger) {
                     case 'second':
@@ -146,9 +154,18 @@ const vueApp = {
                 }
             };
             if (canChangeTempo()) {
-                let updatedTempo = this.tempo + this.jumpBpm;
-                if (updatedTempo > this.endTempo)
-                    updatedTempo = this.startTempo;
+                let updatedTempo = this.isReversing ? this.tempo - this.jumpBpm : this.tempo + this.jumpBpm;
+                if (updatedTempo > this.endTempo || updatedTempo < this.startTempo) {
+                    if (updatedTempo < this.startTempo) {
+                        updatedTempo = this.tempo + this.jumpBpm;  // back to increaseing
+                        this.isReversing = false;
+                    } else if (this.reverseEnabled) {
+                        this.isReversing = true;
+                        updatedTempo = this.tempo - this.jumpBpm;
+                    } else {
+                        updatedTempo = this.startTempo;
+                    }
+                }
                 this.tempo = updatedTempo;
                 this.lastTempoChangeTime = audioCtx.currentTime;
                 this.currentBar = 1;  // also reset bar back to 1.
@@ -168,7 +185,8 @@ const vueApp = {
                     break;
                 case "barCompleted":
                     this.uiVariablesUpdate();
-                    this.scheduleVibration();
+                    if (this.vibrateOn)
+                        this.scheduleVibration();
                     const isFirstBar = this.currentBar == 1;
                     if (isFirstBar) {
                         this.performKnobAnimation();
