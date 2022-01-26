@@ -22,6 +22,8 @@ const vueApp = {
             lastTempoChangeTime: null, // time when user clicked play.
             tickSound: "metronome_1",
             vibrateOn: false,
+            reverseEnabled: false,
+            isReversing: false
         }
     },
     methods: {
@@ -146,9 +148,18 @@ const vueApp = {
                 }
             };
             if (canChangeTempo()) {
-                let updatedTempo = this.tempo + this.jumpBpm;
-                if (updatedTempo > this.endTempo)
-                    updatedTempo = this.startTempo;
+                let updatedTempo = this.isReversing ? this.tempo - this.jumpBpm : this.tempo + this.jumpBpm;
+                if (updatedTempo > this.endTempo || updatedTempo < this.startTempo) {
+                    if (updatedTempo < this.startTempo) {
+                        updatedTempo = this.tempo + this.jumpBpm;  // back to increaseing
+                        this.isReversing = false;
+                    } else if (this.reverseEnabled) {
+                        this.isReversing = true;
+                        updatedTempo = this.tempo - this.jumpBpm;
+                    } else {
+                        updatedTempo = this.startTempo;
+                    }
+                }
                 this.tempo = updatedTempo;
                 this.lastTempoChangeTime = audioCtx.currentTime;
                 this.currentBar = 1;  // also reset bar back to 1.
