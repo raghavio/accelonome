@@ -1,13 +1,15 @@
 let playedEmptyBuffer = false;
+let player = null;
+const IS_PHONE_APP = navigator.userAgent == 'accelonome-android';
 
 const vueApp = {
     data() {
         return {
             isPlaying: false,
-            startTempo: 100,
+            startTempo: 80,
             tempoUI: null,
             tempo: null,
-            endTempo: 180,
+            endTempo: 160,
             jumpBpm: 10,
             tempoChangeAfterX: 4,  // value of the tempo change trigger. could be number of bars, seconds or minutes.
             noteLength: 0.05,
@@ -25,6 +27,9 @@ const vueApp = {
             reverseEnabled: false,
             isReversing: false,
             shouldAccelerate: true,
+            // drumsEnabled: false,
+            flashOn: false,
+            isPhoneApp: IS_PHONE_APP
         }
     },
     methods: {
@@ -45,6 +50,8 @@ const vueApp = {
             if (this.vibrateOn)
                 navigator.vibrate(0);
             $('.dial').stop();
+            if (IS_PHONE_APP)
+                this.sendDataToAndroid("stop");
         },
         play() {
             if (!playedEmptyBuffer) {
@@ -71,6 +78,8 @@ const vueApp = {
             this.performKnobAnimation();
             if (this.vibrateOn)
                 this.scheduleVibration();
+            if (IS_PHONE_APP)
+                this.sendDataToAndroid("scheduleBar");
         },
         scheduleBar() {
             for (let beat = 1; beat <= this.beats; beat++) {
@@ -96,6 +105,8 @@ const vueApp = {
         performKnobAnimation() {
             if (!this.shouldAccelerate)  // the animation is for tempo change indication. no need if not accelerating.
                 return;
+            if (!this.isPlaying)
+                return;  // race condition issues.
             // UI animation for dial. Should play just for the 1st bar.
             const barTime = this.secondsPerBeat * this.beats;  // time it takes to complete a bar.
             const animationDurationInSeconds = () => {
@@ -131,11 +142,31 @@ const vueApp = {
             });
         },
         scheduleVibration() {
+            if (IS_PHONE_APP) // don't play if on phone app.
+                return;
             let vibrationPatterns = [];
             for (let beat = 1; beat <= this.beats; beat++) {
-                vibrationPatterns.push(50, (this.secondsPerBeat - 0.05) * 1000);
+                if (this.accentedBeats.includes(beat)) {
+                    vibrationPatterns.push(25, 15, 25, Math.round((this.secondsPerBeat) * 1000) - 65);
+                } else {
+                    vibrationPatterns.push(65, Math.round((this.secondsPerBeat) * 1000) - 65);
+                }
             }
             navigator.vibrate(vibrationPatterns);
+        },
+        sendDataToAndroid(eventName) {
+            let data = {};
+            if (eventName == "scheduleBar") {
+                data = {
+                    vibration: this.vibrateOn,
+                    flash: this.flashOn,
+                    waitTime: Array(this.beats).fill(Math.round((this.secondsPerBeat) * 1000)),
+                    accentedBeats: this.accentedBeats
+                }
+            }
+            try {
+                Lightation.postMessage(JSON.stringify({ eventName: eventName, data: data }));
+            } catch { }
         },
         barCompleted() {
             this.currentBar += 1;
@@ -191,6 +222,8 @@ const vueApp = {
                     if (isFirstBar) {
                         this.performKnobAnimation();
                     }
+                    if (IS_PHONE_APP)
+                        this.sendDataToAndroid("scheduleBar");
                     break;
             }
         }
