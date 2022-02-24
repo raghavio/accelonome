@@ -218,20 +218,8 @@ const vueApp = {
         barCompleted() {
             this.currentBar += 1;
             this.scheduledBeats.splice(0, 4); // remove the played beats after a bar is over.
-            const canChangeTempo = () => {
-                if (!this.shouldAccelerate)
-                    return false;
-                seconds_since_first_play = audioCtx.currentTime - this.lastTempoChangeTime;
-                switch (this.tempoChangeTrigger) {
-                    case 'second':
-                        return seconds_since_first_play >= this.tempoChangeAfterX;
-                    case 'minute':
-                        return seconds_since_first_play >= this.tempoChangeAfterX * 60;
-                    case 'bar':
-                        return this.currentBar == this.tempoChangeAfterX + 1;
-                }
-            };
-            if (canChangeTempo()) {
+            const isLastBarBeforeTempoChange = this.currentBar == this.barsToPlay + 1;
+            if (isLastBarBeforeTempoChange) {
                 let updatedTempo = this.isReversing ? this.tempo - this.jumpBpm : this.tempo + this.jumpBpm;
                 if (updatedTempo > this.endTempo || updatedTempo < this.startTempo) {
                     if (updatedTempo < this.startTempo) {
