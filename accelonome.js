@@ -1,6 +1,22 @@
 let playedEmptyBuffer = false;
 let player = null;
+
 const IS_PHONE_APP = navigator.userAgent == 'accelonome-android';
+const DRUMS_PATTERN = {
+    4: {
+        4: {
+            "open_hihat": { "inbetween": [[], [15]], "filler": [], "volume": 0.3, "duration": 0.4 },
+            "closed_hithat": { "inbetween": [[3, 7, 11, 15], [3, 7, 11, 15]], "volume": 0.05, "duration": 1 },
+            "crash_cymbal": { "first_bar": [1], "inbetween": [], "volume": 0.5, "duration": 2 },
+            "kick": { "inbetween": [[1, 9, 11], [1, 9, 11]], "volume": 0.95, "duration": 1 },
+            "snare": { "inbetween": [[5, 13], [5, 13]], "filler": [5, 13, 15, 16], "volume": 1, "duration": 1 }
+        },
+    },
+}
+
+function onWebAudioFontLoad() {
+    player = new WebAudioFontPlayer(); // https://github.com/surikov/webaudiofont/
+}
 
 const vueApp = {
     data() {
@@ -27,7 +43,7 @@ const vueApp = {
             reverseEnabled: false,
             isReversing: false,
             shouldAccelerate: true,
-            // drumsEnabled: false,
+            drumsEnabled: false,
             flashOn: false,
             isPhoneApp: IS_PHONE_APP
         }
@@ -46,6 +62,7 @@ const vueApp = {
             this.scheduledBeats.forEach(osc => {
                 osc.stop();
             });
+            player.cancelQueue(audioCtx);
             this.scheduledBeats = [];
             if (this.vibrateOn)
                 navigator.vibrate(0);
@@ -82,6 +99,9 @@ const vueApp = {
                 this.sendDataToAndroid("scheduleBar");
         },
         scheduleBar() {
+            if (this.drumsEnabled) {
+                this.scheduleDrums();
+            }
             for (let beat = 1; beat <= this.beats; beat++) {
                 const source = audioCtx.createBufferSource();
                 source.connect(audioCtx.destination);
@@ -101,6 +121,33 @@ const vueApp = {
 
             timerWorker.postMessage({ eventName: "scheduleBar", inSeconds: next_bar_to_be_scheduled_in_seconds });
             timerWorker.postMessage({ eventName: "barCompleted", inSeconds: barFinishTimeInSeconds });
+        },
+        scheduleDrums() {
+            const sixteenthTime = 60.0 / (this.tempo * 4);
+            const beatLength = 1 / 16 * sixteenthTime;
+            const isLastBarBeforeTempoChange = this.currentBar == this.barsToPlay;
+
+            for (const [instrument, config] of Object.entries(DRUMS_PATTERN[this.note][this.beats])) {
+                let beat = null;
+
+                if (this.currentBar == 1 && 'first_bar' in config) {
+                    beat = config['first_bar'];
+                } else if (isLastBarBeforeTempoChange && 'filler' in config) {
+                    beat = config['filler'];
+                } else if (config['inbetween'].length >= 1) {
+                    if (config['inbetween'].length == 1)
+                        beat = config['inbetween'][0];
+                    else
+                        beat = config['inbetween'][(this.currentBar - 1) % 2];  // alternate the inbetween beats
+                } else {
+                    continue;
+                }
+                for (const sixteenthNote of beat) {
+                    const volume = (1.0 - Math.random() * 0.3) * config['volume'];
+                    player.queueWaveTable(audioCtx, audioCtx.destination, { zones: [SOUNDS[instrument]] },
+                        beatLength + this.nextNoteTime + (sixteenthNote - 1) * sixteenthTime, SOUNDS[instrument].originalPitch / 100, config['duration'], volume);
+                }
+            }
         },
         performKnobAnimation() {
             if (!this.shouldAccelerate)  // the animation is for tempo change indication. no need if not accelerating.
@@ -242,6 +289,12 @@ const vueApp = {
             const note_multiplier = this.note / 4;  // will give 2 for 8th note. ex: 1 quarter note = 2 8th note.
             const secondsPerBeat = 60.0 / (this.tempo * note_multiplier);
             return secondsPerBeat;
+        },
+        areDrumsAvailable: function() {
+            const isAvailable = this.note in DRUMS_PATTERN && this.beats in DRUMS_PATTERN[this.note];
+            if (!isAvailable)
+                this.drumsEnabled = false;
+            return isAvailable;
         }
     },
     watch: {
