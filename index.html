@@ -23,6 +23,10 @@
 			#resetButton {
 				float: right;
 			}
+
+			#drumsCheckBox {
+				margin-left: 10px;
+			}
 		}
 	</style>
 </head>
@@ -140,9 +144,9 @@
 					<label class="radio-inline">
 						<input type="radio" v-model="tickSound" value="metronome_4"> 4
 					</label>
-					<!-- <label class="checkbox-inline">
-						<input type="checkbox" v-model="drumsEnabled"> Drums
-					</label> -->
+					<label class="checkbox-inline" id="drumsCheckBox">
+						<input type="checkbox" v-model="drumsEnabled" :disabled="!areDrumsAvailable">Drums
+					</label>
 				</div>
 				<div class="col-xs-offset-4 col-xs-8 col-md-offset-5 col-md-7">
 					<label class="checkbox-inline">
@@ -199,10 +203,7 @@
 	<script src="https://unpkg.com/jquery-knob@1.2.11/dist/jquery.knob.min.js"></script>
 	<script src="https://unpkg.com/vue@3.2.26/dist/vue.global.prod.js"></script>
 	<script src="accelonome.js"></script>
-	<!-- <script src="https://unpkg.com/webaudiofont@2.7.1/npm/dist/WebAudioFontPlayer.js"></script>
-	<script src='https://surikov.github.io/webaudiofontdata/sound/12835_0_FluidR3_GM_sf2_file.js'></script>
-	<script src='https://surikov.github.io/webaudiofontdata/sound/12838_0_FluidR3_GM_sf2_file.js'></script>
-	<script src='https://surikov.github.io/webaudiofontdata/sound/12846_0_FluidR3_GM_sf2_file.js'></script> -->
+	<script src="webfontplayer.min.js" onload="onWebAudioFontLoad();"></script>
 	<script defer src="https://www.googletagmanager.com/gtag/js?id=G-1SCY6XELC9"></script>
 	<script>
 		window.dataLayer = window.dataLayer || [];
@@ -212,4 +213,5 @@
 		gtag('config', 'G-1SCY6XELC9');
 	</script>
 </body>
+
 </html>
