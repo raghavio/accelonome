@@ -11,6 +11,7 @@ has support for:
 - different time signatures
 - custom accented beats
 - different tick sounds
+- drum beats
 - vibration pulse on mobile
 
 
