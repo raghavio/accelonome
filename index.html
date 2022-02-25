@@ -18,13 +18,24 @@
 		<link rel="stylesheet"
 			href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
 	</noscript>
+	<style>
+		@media (min-width: 365px) {
+			#resetButton {
+				float: right;
+			}
+
+			#drumsCheckBox {
+				margin-left: 10px;
+			}
+		}
+	</style>
 </head>
 
-<body style="background-color: #000000;color: #ffffff; font-family: Verdana, Geneva, Tahoma, sans-serif;">
+<body style="background-color: #000000;color: #ffffff; font-family: 'Roboto Mono', monospace; font-size: 15px;">
 	<main id="vue-app" class="container">
 		<header class="page-header text-center">
 			<img src="header_icon.png" alt="An image of metronome" width=128 height=128 style="vertical-align:middle" />
-			<span style="font-family:'Courier New', Courier, monospace; font-size: 45px">Accelonome</span>
+			<span style="vertical-align: middle; font-size: 45px"> Accelonome</span>
 		</header>
 		<form class="form-horizontal col-sm-offset-2 col-sm-10 col-md-offset-1 col-md-5">
 			<div class="form-group">
@@ -43,7 +54,8 @@
 				<label for="endTempo" class="col-xs-4 col-md-5 control-label">Max Tempo</label>
 				<div class="col-xs-8 col-sm-5 col-md-7">
 					<div class="input-group">
-						<input type="number" class="form-control" v-model="endTempo" id="endTempo">
+						<input type="number" class="form-control" v-model="endTempo" id="endTempo"
+							:disabled="!shouldAccelerate">
 						<div class="input-group-addon">BPM</div>
 					</div>
 				</div>
@@ -54,7 +66,7 @@
 				<div class="col-xs-8 col-sm-5 col-md-7">
 					<div class="input-group">
 						<input type="number" class="form-control" v-model="jumpBpm" id="jumpTempo"
-							:disabled="isPlaying">
+							:disabled="isPlaying || !shouldAccelerate">
 						<div class="input-group-addon">BPM</div>
 					</div>
 				</div>
@@ -64,10 +76,11 @@
 					Every</label>
 				<div class="col-xs-3 col-sm-2 col-md-3">
 					<input type="number" class="form-control" v-model="tempoChangeAfterX" id="tempoChangeAfterX"
-						:disabled="isPlaying">
+						:disabled="isPlaying || !shouldAccelerate">
 				</div>
 				<div class="col-xs-4 col-sm-2 col-md-4" style="text-align: left; padding-left: 0;">
-					<select class="form-control" v-model="tempoChangeTrigger" :disabled="isPlaying">
+					<select class="form-control" v-model="tempoChangeTrigger"
+						:disabled="isPlaying || !shouldAccelerate">
 						<option value="bar">Bars</option>
 						<option value="second">Seconds</option>
 						<option value="minute">Minutes</option>
@@ -131,10 +144,17 @@
 					<label class="radio-inline">
 						<input type="radio" v-model="tickSound" value="metronome_4"> 4
 					</label>
+					<label class="checkbox-inline" id="drumsCheckBox">
+						<input type="checkbox" v-model="drumsEnabled" :disabled="!areDrumsAvailable">Drums
+					</label>
 				</div>
 				<div class="col-xs-offset-4 col-xs-8 col-md-offset-5 col-md-7">
-					<label>
+					<label class="checkbox-inline">
 						<input type="checkbox" v-model="vibrateOn"> Vibrate
+					</label>
+					<label class="checkbox-inline">
+						<input type="checkbox" v-model="flashOn" :disabled="!isPhoneApp"> Flash <a v-if="!isPhoneApp"
+							href="https://play.google.com/store/apps/details?id=diy.ananth.accelonome">(app)</a>
 					</label>
 				</div>
 			</div>
@@ -142,13 +162,19 @@
 		</form>
 		<div id="playButtons" class="col-md-6">
 			<div class="col-xs-12 col-sm-12 col-md-12">
-				<button type="button" class="btn btn-danger btn-xs" style="float: right;" @click=reset>Reset
+				<label class="checkbox-inline"><input v-model="shouldAccelerate" :disabled="isPlaying" type="checkbox">
+					Accelerate</label>
+				<label class="checkbox-inline"><input v-model="reverseEnabled" type="checkbox"> Reverse</label>
+				<button type="button" class="btn btn-danger btn-xs" id="resetButton" @click=reset>Reset
 					tempo</button>
 			</div>
+			<br />
+			<br />
 			<div class="text-center">
 				<button type="button" value="0" class="dial" @click="isPlaying ? stop() : play()"><span
-						style="color:#ffffff">{{isPlaying ? tempoUI : 'Start'}}</span>
-					<span v-if="isPlaying" style="font-size: 15px;color:#ffffff;"><br />Bar:
+						style="font-family: 'Roboto Mono', monospace;color:#ffffff">{{isPlaying ? tempoUI :
+						'Start'}}</span>
+					<span v-if="isPlaying && shouldAccelerate" style="font-size: 15px;color:#ffffff;"><br />Bar:
 						{{currentBarUI}}/{{barsToPlay}}</span></button>
 			</div>
 			<br />
@@ -177,6 +203,7 @@
 	<script src="https://unpkg.com/jquery-knob@1.2.11/dist/jquery.knob.min.js"></script>
 	<script src="https://unpkg.com/vue@3.2.26/dist/vue.global.prod.js"></script>
 	<script src="accelonome.js"></script>
+	<script src="webfontplayer.min.js" onload="onWebAudioFontLoad();"></script>
 	<script defer src="https://www.googletagmanager.com/gtag/js?id=G-1SCY6XELC9"></script>
 	<script>
 		window.dataLayer = window.dataLayer || [];

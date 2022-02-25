@@ -1,13 +1,31 @@
 let playedEmptyBuffer = false;
+let player = null;
+
+const IS_PHONE_APP = navigator.userAgent == 'accelonome-android';
+const DRUMS_PATTERN = {
+    4: {
+        4: {
+            "open_hihat": { "inbetween": [[], [15]], "filler": [], "volume": 0.3, "duration": 0.4 },
+            "closed_hithat": { "inbetween": [[3, 7, 11, 15], [3, 7, 11, 15]], "volume": 0.05, "duration": 1 },
+            "crash_cymbal": { "first_bar": [1], "inbetween": [], "volume": 0.5, "duration": 2 },
+            "kick": { "inbetween": [[1, 9, 11], [1, 9, 11]], "volume": 0.95, "duration": 1 },
+            "snare": { "inbetween": [[5, 13], [5, 13]], "filler": [5, 13, 15, 16], "volume": 1, "duration": 1 }
+        },
+    },
+}
+
+function onWebAudioFontLoad() {
+    player = new WebAudioFontPlayer(); // https://github.com/surikov/webaudiofont/
+}
 
 const vueApp = {
     data() {
         return {
             isPlaying: false,
-            startTempo: 100,
+            startTempo: 80,
             tempoUI: null,
             tempo: null,
-            endTempo: 180,
+            endTempo: 160,
             jumpBpm: 10,
             tempoChangeAfterX: 4,  // value of the tempo change trigger. could be number of bars, seconds or minutes.
             noteLength: 0.05,
@@ -22,6 +40,12 @@ const vueApp = {
             lastTempoChangeTime: null, // time when user clicked play.
             tickSound: "metronome_1",
             vibrateOn: false,
+            reverseEnabled: false,
+            isReversing: false,
+            shouldAccelerate: true,
+            drumsEnabled: false,
+            flashOn: false,
+            isPhoneApp: IS_PHONE_APP
         }
     },
     methods: {
@@ -31,17 +55,20 @@ const vueApp = {
             this.tempoUI = this.tempo;
         },
         stop() {
+            timerWorker.postMessage({ eventName: "clearTimeout" });
             this.currentBar = 1;
             this.currentBarUI = this.currentBar;
             this.isPlaying = false;
-            timerWorker.postMessage({ eventName: "clearTimeout" });
             this.scheduledBeats.forEach(osc => {
                 osc.stop();
             });
+            player.cancelQueue(audioCtx);
             this.scheduledBeats = [];
-            $('.dial').stop();
             if (this.vibrateOn)
                 navigator.vibrate(0);
+            $('.dial').stop();
+            if (IS_PHONE_APP)
+                this.sendDataToAndroid("stop");
         },
         play() {
             if (!playedEmptyBuffer) {
@@ -66,12 +93,19 @@ const vueApp = {
             this.lastTempoChangeTime = audioCtx.currentTime;  // used in case if tempo change trigger is time basis.
             this.scheduleBar();
             this.performKnobAnimation();
-            this.scheduleVibration();
+            if (this.vibrateOn)
+                this.scheduleVibration();
+            if (IS_PHONE_APP)
+                this.sendDataToAndroid("scheduleBar");
         },
         scheduleBar() {
+            if (this.drumsEnabled) {
+                this.scheduleDrums();
+            }
             for (let beat = 1; beat <= this.beats; beat++) {
                 const source = audioCtx.createBufferSource();
-                source.connect(audioCtx.destination);
+                source.connect(metronomeGain);
+                metronomeGain.connect(audioCtx.destination);
 
                 if (this.accentedBeats.includes(beat)) {
                     source.buffer = SOUNDS[this.tickSound + '_accent']['buffer'];
@@ -89,7 +123,38 @@ const vueApp = {
             timerWorker.postMessage({ eventName: "scheduleBar", inSeconds: next_bar_to_be_scheduled_in_seconds });
             timerWorker.postMessage({ eventName: "barCompleted", inSeconds: barFinishTimeInSeconds });
         },
+        scheduleDrums() {
+            const sixteenthTime = 60.0 / (this.tempo * 4);
+            const beatLength = 1 / 16 * sixteenthTime;
+            const isLastBarBeforeTempoChange = this.currentBar == this.barsToPlay;
+
+            for (const [instrument, config] of Object.entries(DRUMS_PATTERN[this.note][this.beats])) {
+                let beat = null;
+
+                if (this.currentBar == 1 && 'first_bar' in config) {
+                    beat = config['first_bar'];
+                } else if (isLastBarBeforeTempoChange && 'filler' in config) {
+                    beat = config['filler'];
+                } else if (config['inbetween'].length >= 1) {
+                    if (config['inbetween'].length == 1)
+                        beat = config['inbetween'][0];
+                    else
+                        beat = config['inbetween'][(this.currentBar - 1) % 2];  // alternate the inbetween beats
+                } else {
+                    continue;
+                }
+                for (const sixteenthNote of beat) {
+                    const volume = (1.0 - Math.random() * 0.3) * config['volume'];
+                    player.queueWaveTable(audioCtx, audioCtx.destination, { zones: [SOUNDS[instrument]] },
+                        beatLength + this.nextNoteTime + (sixteenthNote - 1) * sixteenthTime, SOUNDS[instrument].originalPitch / 100, config['duration'], volume);
+                }
+            }
+        },
         performKnobAnimation() {
+            if (!this.shouldAccelerate)  // the animation is for tempo change indication. no need if not accelerating.
+                return;
+            if (!this.isPlaying)
+                return;  // race condition issues.
             // UI animation for dial. Should play just for the 1st bar.
             const barTime = this.secondsPerBeat * this.beats;  // time it takes to complete a bar.
             const animationDurationInSeconds = () => {
@@ -125,30 +190,49 @@ const vueApp = {
             });
         },
         scheduleVibration() {
+            if (IS_PHONE_APP) // don't play if on phone app.
+                return;
             let vibrationPatterns = [];
             for (let beat = 1; beat <= this.beats; beat++) {
-                vibrationPatterns.push(50, (this.secondsPerBeat - 0.05) * 1000);
+                if (this.accentedBeats.includes(beat)) {
+                    vibrationPatterns.push(25, 15, 25, Math.round((this.secondsPerBeat) * 1000) - 65);
+                } else {
+                    vibrationPatterns.push(65, Math.round((this.secondsPerBeat) * 1000) - 65);
+                }
             }
             navigator.vibrate(vibrationPatterns);
+        },
+        sendDataToAndroid(eventName) {
+            let data = {};
+            if (eventName == "scheduleBar") {
+                data = {
+                    vibration: this.vibrateOn,
+                    flash: this.flashOn,
+                    waitTime: Array(this.beats).fill(Math.round((this.secondsPerBeat) * 1000)),
+                    accentedBeats: this.accentedBeats
+                }
+            }
+            try {
+                Lightation.postMessage(JSON.stringify({ eventName: eventName, data: data }));
+            } catch { }
         },
         barCompleted() {
             this.currentBar += 1;
             this.scheduledBeats.splice(0, 4); // remove the played beats after a bar is over.
-            const canChangeTempo = () => {
-                seconds_since_first_play = audioCtx.currentTime - this.lastTempoChangeTime;
-                switch (this.tempoChangeTrigger) {
-                    case 'second':
-                        return seconds_since_first_play >= this.tempoChangeAfterX;
-                    case 'minute':
-                        return seconds_since_first_play >= this.tempoChangeAfterX * 60;
-                    case 'bar':
-                        return this.currentBar == this.tempoChangeAfterX + 1;
+            const isLastBarBeforeTempoChange = this.currentBar == this.barsToPlay + 1;
+            if (isLastBarBeforeTempoChange) {
+                let updatedTempo = this.isReversing ? this.tempo - this.jumpBpm : this.tempo + this.jumpBpm;
+                if (updatedTempo > this.endTempo || updatedTempo < this.startTempo) {
+                    if (updatedTempo < this.startTempo) {
+                        updatedTempo = this.tempo + this.jumpBpm;  // back to increaseing
+                        this.isReversing = false;
+                    } else if (this.reverseEnabled) {
+                        this.isReversing = true;
+                        updatedTempo = this.tempo - this.jumpBpm;
+                    } else {
+                        updatedTempo = this.startTempo;
+                    }
                 }
-            };
-            if (canChangeTempo()) {
-                let updatedTempo = this.tempo + this.jumpBpm;
-                if (updatedTempo > this.endTempo)
-                    updatedTempo = this.startTempo;
                 this.tempo = updatedTempo;
                 this.lastTempoChangeTime = audioCtx.currentTime;
                 this.currentBar = 1;  // also reset bar back to 1.
@@ -168,11 +252,14 @@ const vueApp = {
                     break;
                 case "barCompleted":
                     this.uiVariablesUpdate();
-                    this.scheduleVibration();
+                    if (this.vibrateOn)
+                        this.scheduleVibration();
                     const isFirstBar = this.currentBar == 1;
                     if (isFirstBar) {
                         this.performKnobAnimation();
                     }
+                    if (IS_PHONE_APP)
+                        this.sendDataToAndroid("scheduleBar");
                     break;
             }
         }
@@ -191,6 +278,12 @@ const vueApp = {
             const note_multiplier = this.note / 4;  // will give 2 for 8th note. ex: 1 quarter note = 2 8th note.
             const secondsPerBeat = 60.0 / (this.tempo * note_multiplier);
             return secondsPerBeat;
+        },
+        areDrumsAvailable: function() {
+            const isAvailable = this.note in DRUMS_PATTERN && this.beats in DRUMS_PATTERN[this.note];
+            if (!isAvailable)
+                this.drumsEnabled = false;
+            return isAvailable;
         }
     },
     watch: {
