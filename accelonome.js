@@ -104,7 +104,8 @@ const vueApp = {
             }
             for (let beat = 1; beat <= this.beats; beat++) {
                 const source = audioCtx.createBufferSource();
-                source.connect(audioCtx.destination);
+                source.connect(metronomeGain);
+                metronomeGain.connect(audioCtx.destination);
 
                 if (this.accentedBeats.includes(beat)) {
                     source.buffer = SOUNDS[this.tickSound + '_accent']['buffer'];
