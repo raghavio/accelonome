@@ -1,4 +1,4 @@
-name: NodeJS with Grunt
+name: Uglyfy
 
 on:
   push:
@@ -19,12 +19,8 @@ jobs:
       uses: nizarmah/auto-minify@v2.1.1
       with:
         # Directory that contains the files you want to minify. Defaults to current directory (.)
-#         directory: # optional, default is .
+        directory: /
         # Directory that contains the minified files. Defaults to same directory
-#         output: # optional, default is 
+        output: /
         # Overwrites the existing files with the minified version. Defaults to false.
-        overwrite: true # optional, default is false
-        # Descend at most levels (a non-negative integer) levels of directories below the starting-points.
-#         maxdepth: # optional, default is 
-        # Specifies which of the supported packages minifies JS files.
-#         js_engine: # optional, default is babel
+        overwrite: true
