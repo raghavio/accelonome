@@ -6,12 +6,22 @@ const DRUMS_PATTERN = {
     4: {
         4: {
             "open_hihat": { "inbetween": [[], [15]], "filler": [], "volume": 0.3, "duration": 0.4 },
-            "closed_hithat": { "inbetween": [[3, 7, 11, 15], [3, 7, 11, 15]], "volume": 0.05, "duration": 1 },
+            "closed_hithat": { "inbetween": [[3, 7, 11, 15]], "volume": 0.05, "duration": 1 },
             "crash_cymbal": { "first_bar": [1], "inbetween": [], "volume": 0.5, "duration": 2 },
-            "kick": { "inbetween": [[1, 9, 11], [1, 9, 11]], "volume": 0.95, "duration": 1 },
-            "snare": { "inbetween": [[5, 13], [5, 13]], "filler": [5, 13, 15, 16], "volume": 1, "duration": 1 }
+            "kick": { "inbetween": [[1, 9, 11]], "volume": 0.95, "duration": 1 },
+            "snare": { "inbetween": [[5, 13]], "filler": [5, 13, 15, 16], "volume": 1, "duration": 1 }
         },
     },
+    8: {
+        6: {
+            "open_hihat": { "inbetween": [[], [11]], "filler": [], "volume": 0.3, "duration": 0.5 },
+            "closed_hithat": { "inbetween": [[1,3,5,7,9,11], [1,3,5,7,9]], "volume": 0.3, "duration": 0.5 },
+            "crash_cymbal": { "first_bar": [1], "inbetween": [], "volume": 0.5, "duration": 2 },
+            "kick": { "inbetween": [[1,11]], "volume": 0.95, "duration": 1 },
+            "snare": { "inbetween": [[7]], "filler": [7,9,10], "volume": 1, "duration": 1 },
+            "tom": { "filler": [11], "inbetween": [], "volume": 1, "duration": 1 }
+        },
+    }
 }
 
 function onWebAudioFontLoad() {
