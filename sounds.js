@@ -1,6 +1,6 @@
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
-const metronomeGain = new GainNode(audioCtx, {gain: 0.4});
+const metronomeGain = new GainNode(audioCtx, {gain: 0.5});
 const SOUNDS = {
     "metronome_1_accent": { "path": "/assets/audio/metronome_beat_1_accent.mp3", "buffer": null },
     "metronome_1": { "path": "/assets/audio/metronome_beat_1.mp3", "buffer": null },
@@ -24,6 +24,9 @@ const SOUNDS = {
     },
     "closed_hithat": {
         "path": "/assets/audio/hihat-closed.wav", "buffer": null, fineTune: 0, originalPitch: 4200
+    },
+    "tom": {
+        "path": "/assets/audio/tom.wav", "buffer": null, fineTune: 0, originalPitch: 5000
     },
 };
 
