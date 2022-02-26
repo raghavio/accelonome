@@ -7,12 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [12.x, 14.x, 16.x]
     
     steps:
+    - uses: actions/checkout@v2
     - name: Auto Minify
       # You may pin to the exact commit or the version.
       # uses: nizarmah/auto-minify@7028a7a4b79ccdc7e00f351baed61c59d07690ee
