@@ -164,6 +164,8 @@
 			<div class="col-xs-12 col-sm-12 col-md-12">
 				<label class="checkbox-inline"><input v-model="shouldAccelerate" :disabled="isPlaying" type="checkbox">
 					Accelerate</label>
+				<label class="checkbox-inline"><input v-model="startCueEnabled" :disabled="isPlaying" type="checkbox">
+					Count-in</label>
 				<label class="checkbox-inline"><input v-model="reverseEnabled" type="checkbox"> Reverse</label>
 				<button type="button" class="btn btn-danger btn-xs" id="resetButton" @click=reset>Reset
 					tempo</button>

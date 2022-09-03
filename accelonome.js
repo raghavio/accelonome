@@ -60,6 +60,7 @@ const vueApp = {
             reverseEnabled: false,
             isReversing: false,
             shouldAccelerate: true,
+            startCueEnabled: true,
             drumsEnabled: false,
             flashOn: false,
             isPhoneApp: IS_PHONE_APP
@@ -87,6 +88,13 @@ const vueApp = {
             if (IS_PHONE_APP)
                 this.sendDataToAndroid("stop");
         },
+        enableStartCue() {
+            this.currentBar -= 1;
+            this.currentBarUI -= 1;
+        },
+        isStartCueBar() {
+            return this.currentBar == 0;
+        },
         play() {
             if (!playedEmptyBuffer) {
                 // play silent buffer to unlock the audio. Fix for iOS.
@@ -107,16 +115,20 @@ const vueApp = {
                 this.userEnteredTempo = this.startTempo;
             }
             this.nextNoteTime = audioCtx.currentTime;
-            this.lastTempoChangeTime = audioCtx.currentTime;  // used in case if tempo change trigger is time basis.
+            if (this.startCueEnabled) {
+                this.enableStartCue();
+            } else { // not to show knob animation if it's start cue
+                this.lastTempoChangeTime = audioCtx.currentTime;  // used in case if tempo change trigger is time basis.
+                this.performKnobAnimation();
+            }
             this.scheduleBar();
-            this.performKnobAnimation();
             if (this.vibrateOn)
                 this.scheduleVibration();
             if (IS_PHONE_APP)
                 this.sendDataToAndroid("scheduleBar");
         },
         scheduleBar() {
-            if (this.drumsEnabled) {
+            if (this.drumsEnabled && !this.isStartCueBar()) { // don't play drums if it's start cue
                 this.scheduleDrums();
             }
             for (let beat = 1; beat <= this.beats; beat++) {
