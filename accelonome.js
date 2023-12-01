@@ -84,7 +84,7 @@ const vueApp = {
             this.scheduledBeats = [];
             if (this.vibrateOn)
                 navigator.vibrate(0);
-            $('.dial').stop();
+            this.resetKnobAnimation();
             if (IS_PHONE_APP)
                 this.sendDataToAndroid("stop");
         },
@@ -206,17 +206,19 @@ const vueApp = {
             };
             const duration = animationDurationInSeconds();
             this.barsToPlay = Math.round(duration / barTime);
-            $('.dial').stop();  // in case it gets buggy, stop it first before playing.
-            $('.dial').animate({ value: 100 }, {
-                duration: duration * 1000,
-                easing: 'linear',
-                step: function () {
-                    $('.dial').val(this.value).trigger('change');
-                },
-                always: function () {
-                    $('.dial').val(0).trigger('change');
-                }
-            });
+            const progressCircle = this.$refs.knobProgress;
+
+            this.resetKnobAnimation();
+            setTimeout(() => {
+                progressCircle.style.transitionDuration = `${duration}s`;
+            progressCircle.style.strokeDashoffset = '0';
+            }, 50); 
+            
+        },
+        resetKnobAnimation() {
+            const progressCircle = this.$refs.knobProgress;
+            progressCircle.style.transitionDuration = `0s`;
+            progressCircle.style.strokeDashoffset = '282.6';
         },
         scheduleVibration() {
             if (IS_PHONE_APP) // don't play if on phone app.
@@ -292,14 +294,6 @@ const vueApp = {
                     break;
             }
         }
-        $(".dial").knob({
-            width: Math.min(320, document.getElementById("playButtons").offsetWidth - 30),
-            height: Math.min(320, document.getElementById("playButtons").offsetWidth - 30),
-            thickness: '0.10',
-            fgColor: '#ffeb3a',
-            readOnly: true,
-            bgColor: '#2295f1'
-        });
         loadOtherSounds();  // once vue is loaded. download other sounds.
     },
     computed: {
