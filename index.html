@@ -84,7 +84,7 @@
 </head>
 
 <body style="background-color: #000000;color: #ffffff; font-family: 'Roboto Mono', monospace; font-size: 15px;">
-	<main id="vue-app" class="container">
+	<main class="container">
 		<header class="page-header text-center">
 			<img src="header_icon.png" alt="An image of metronome" width=128 height=128 style="vertical-align:middle" />
 			<span style="vertical-align: middle; font-size: 45px"> Accelonome</span>
@@ -96,7 +96,7 @@
 				</label>
 				<div class="col-xs-8 col-sm-5 col-md-7">
 					<div class="input-group">
-						<input type="number" class="form-control" v-model="startTempo" id="startTempo"
+						<input type="number" class="form-control" data-bind="startTempo" id="startTempo"
 							:disabled="isPlaying">
 						<div class="input-group-addon">BPM</div>
 					</div>
@@ -106,7 +106,7 @@
 				<label for="endTempo" class="col-xs-4 col-md-5 control-label">Max Tempo</label>
 				<div class="col-xs-8 col-sm-5 col-md-7">
 					<div class="input-group">
-						<input type="number" class="form-control" v-model="endTempo" id="endTempo"
+						<input type="number" class="form-control" data-bind="endTempo" id="endTempo"
 							:disabled="!shouldAccelerate">
 						<div class="input-group-addon">BPM</div>
 					</div>
@@ -117,7 +117,7 @@
 					By</label>
 				<div class="col-xs-8 col-sm-5 col-md-7">
 					<div class="input-group">
-						<input type="number" class="form-control" v-model="jumpBpm" id="jumpTempo"
+						<input type="number" class="form-control" data-bind="jumpBpm" id="jumpTempo"
 							:disabled="isPlaying || !shouldAccelerate">
 						<div class="input-group-addon">BPM</div>
 					</div>
@@ -127,11 +127,11 @@
 				<label for="tempoChangeAfterX" class="col-xs-4 col-md-5 control-label">After
 					Every</label>
 				<div class="col-xs-3 col-sm-2 col-md-3">
-					<input type="number" class="form-control" v-model="tempoChangeAfterX" id="tempoChangeAfterX"
-						:disabled="isPlaying || !shouldAccelerate">
+					<input type="number" class="form-control" data-bind="tempoChangeAfterX" id="tempoChangeAfterX"
+						disabled="isPlaying || !userInput.shouldAccelerate">
 				</div>
 				<div class="col-xs-4 col-sm-2 col-md-4" style="text-align: left; padding-left: 0;">
-					<select class="form-control" v-model="tempoChangeTrigger"
+					<select class="form-control" data-bind="tempoChangeTrigger"
 						:disabled="isPlaying || !shouldAccelerate">
 						<option value="bar">Bars</option>
 						<option value="second">Seconds</option>
@@ -143,7 +143,7 @@
 				<label for="timeSig" class="col-xs-4 col-md-5 control-label">Time
 					Signature</label>
 				<div class="col-xs-3 col-sm-2 col-md-3">
-					<select class="form-control" style="padding-right: 0px;" v-model.number="beats"
+					<select class="form-control" style="padding-right: 0px;" data-bind="beats"
 						:disabled="isPlaying" id="timeSig">
 						<option value="1">1</option>
 						<option value="2">2</option>
@@ -165,7 +165,7 @@
 				</div>
 				<span style="position: relative;float:left;font-size: 25px">/</span>
 				<div class="col-xs-3 col-sm-2 col-md-3">
-					<select class="form-control" style="padding-right: 0px;" v-model="note" :disabled="isPlaying">
+					<select class="form-control" style="padding-right: 0px;" data-bind="note" :disabled="isPlaying">
 						<option value="2">2</option>
 						<option value="4">4</option>
 						<option value="8">8</option>
@@ -175,9 +175,9 @@
 			</div>
 			<div class="form-group">
 				<div class="col-xs-offset-4 col-xs-4 col-sm-3 col-md-offset-5" style="width:160px">
-					<select class="selectpicker form-control" multiple title="Accent beats"
-						data-selected-text-format="static" mobile=true v-model="accentedBeats">
-						<option v-for="beat in beats" :value=beat :key="beat">{{beat}}</option>
+					<select id="accentedBeatsSelect" class="selectpicker form-control" multiple title="Accent beats"
+						data-selected-text-format="static" mobile=true>
+						<!-- <option v-for="beat in beats" :value=beat :key="beat">{{beat}}</option> -->
 					</select>
 				</div>
 			</div>
@@ -185,27 +185,27 @@
 				<label class="col-xs-4 col-md-5 control-label">Sound</label>
 				<div class="col-xs-8 col-md-7">
 					<label class="radio-inline">
-						<input type="radio" v-model="tickSound" value="metronome_1"> 1
+						<input type="radio" data-bind="tickSound" value="metronome_1"> 1
 					</label>
 					<label class="radio-inline">
-						<input type="radio" v-model="tickSound" value="metronome_2"> 2
+						<input type="radio" data-bind="tickSound" value="metronome_2"> 2
 					</label>
 					<label class="radio-inline">
-						<input type="radio" v-model="tickSound" value="metronome_3"> 3
+						<input type="radio" data-bind="tickSound" value="metronome_3"> 3
 					</label>
 					<label class="radio-inline">
-						<input type="radio" v-model="tickSound" value="metronome_4"> 4
+						<input type="radio" data-bind="tickSound" value="metronome_4"> 4
 					</label>
 					<label class="checkbox-inline" id="drumsCheckBox">
-						<input type="checkbox" v-model="drumsEnabled" :disabled="!areDrumsAvailable">Drums
+						<input type="checkbox" data-bind="drumsEnabled" disabled="!areDrumsAvailable();">Drums
 					</label>
 				</div>
 				<div class="col-xs-offset-4 col-xs-8 col-md-offset-5 col-md-7">
 					<label class="checkbox-inline">
-						<input type="checkbox" v-model="vibrateOn"> Vibrate
+						<input type="checkbox" data-bind="vibrateOn"> Vibrate
 					</label>
 					<label class="checkbox-inline">
-						<input type="checkbox" v-model="flashOn" :disabled="!isPhoneApp"> Flash <a v-if="!isPhoneApp"
+						<input type="checkbox" data-bind="flashOn" disabled="!isPhoneApp"> Flash <a v-if="!isPhoneApp"
 							href="https://play.google.com/store/apps/details?id=diy.antweb.accelonome">(app)</a>
 					</label>
 				</div>
@@ -214,30 +214,28 @@
 		</form>
 		<div id="playButtons" class="col-md-6">
 			<div class="col-xs-12 col-sm-12 col-md-12">
-				<label class="checkbox-inline"><input v-model="shouldAccelerate" :disabled="isPlaying" type="checkbox">
+				<label class="checkbox-inline"><input data-bind="shouldAccelerate" :disabled="isPlaying" type="checkbox">
 					Accelerate</label>
-				<label class="checkbox-inline"><input v-model="startCueEnabled" :disabled="isPlaying" type="checkbox">
+					<label class="checkbox-inline"><input data-bind="startCueEnabled" :disabled="isPlaying" type="checkbox">
 					Count-in</label>
-				<label class="checkbox-inline"><input v-model="reverseEnabled" type="checkbox"> Reverse</label>
-				<button type="button" class="btn btn-danger btn-xs" id="resetButton" @click=reset>Reset
+				<label class="checkbox-inline"><input data-bind="reverseEnabled" type="checkbox"> Reverse</label>
+				<button type="button" class="btn btn-danger btn-xs" id="resetButton" onclick="reset();">Reset
 					tempo</button>
 			</div>
 			<br />
 			<br />
 			<div class="knob-wrapper">
-				<div class="knob-container" @click="isPlaying ? stop() : play()">
+				<div class="knob-container" onclick="isPlaying ? stop() : play();">
 					<svg class="knob-svg" viewBox="0 0 100 100">
 						<circle class="knob-bg" cx="50" cy="50" r="45"></circle>
-						<circle class="knob-progress" ref="knobProgress" cx="50" cy="50" r="45"></circle>
+						<circle class="knob-progress" id="knobProgress" cx="50" cy="50" r="45"></circle>
 					</svg>
 					<div class="knob-text">
-						<span style="font-size: 50px; color: #ffffff;">
-							{{ isPlaying ? tempoUI : 'Start' }}
+						<span id="knobText" style="font-size: 50px; color: #ffffff;">Start</span>
+						<span id="knobSubText" style="font-size: 15px; color: #ffffff; display: none;">
+							<br /><br />Bar: <span id="currentBar"></span>/<span id="barsToPlay"></span>
 						</span>
-						<span v-if="isPlaying && shouldAccelerate" style="font-size: 15px; color: #ffffff;">
-							<br /> <br />Bar: {{currentBarUI}}/{{barsToPlay}}
-						</span>
-					</div>
+					</div>					
 				</div>
 			</div>
 			
@@ -264,7 +262,6 @@
 		integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
 		crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
-	<script src="https://unpkg.com/vue@3.2.26/dist/vue.global.prod.js"></script>
 	<script src="accelonome.js"></script>
 	<script src="webfontplayer.min.js" onload="onWebAudioFontLoad();"></script>
 	<script defer src="https://www.googletagmanager.com/gtag/js?id=G-1SCY6XELC9"></script>
@@ -274,6 +271,54 @@
 		gtag('js', new Date());
 
 		gtag('config', 'G-1SCY6XELC9');
+
+		document.addEventListener('DOMContentLoaded', (_) => {
+			const accentedBeatsSelect = document.getElementById('accentedBeatsSelect');
+
+			// Populate the select element with number of beats.
+			for (let beat = 1; beat <= userInput.beats; beat++) {
+				let option = document.createElement('option');
+				option.value = beat;
+				option.textContent = beat;
+				accentedBeatsSelect.appendChild(option);
+			}
+
+			function onAccentedBeatsChange() {
+				userInput["accentedBeats"] = Array.from(accentedBeatsSelect.selectedOptions, option => parseInt(option.value));
+			}
+
+			accentedBeatsSelect.addEventListener('change', onAccentedBeatsChange);
+
+			// Two way binding of input fields.
+			function bindInput(inputElement, variableName) {
+				if (inputElement.type === 'checkbox') {
+					inputElement.checked = !!userInput[variableName];
+				} else {
+					inputElement.value = userInput[variableName];
+				}
+				
+				inputElement.addEventListener('input', (event) => {
+					// Different handling based on input type
+					if (inputElement.type === 'number') {
+						const newValue = event.target.value ? parseInt(event.target.value) : null;
+						userInput[variableName] = isNaN(newValue) ? null : newValue;
+					} else if (inputElement.type === 'checkbox') {
+						userInput[variableName] = inputElement.checked; // Store boolean value for checkbox
+					} else {
+						userInput[variableName] = event.target.value; // Store the value for other input types
+					}
+				});
+			}
+
+			const inputs = document.querySelectorAll('[data-bind]');
+
+			inputs.forEach((inputElement) => {
+				const variableName = inputElement.getAttribute('data-bind');
+				bindInput(inputElement, variableName);
+			});			
+			
+		});
+		
 	</script>
 </body>
 
