@@ -339,5 +339,5 @@ document.addEventListener('DOMContentLoaded', (_) => {
                 break;
         }
     }
-    loadOtherSounds();  // once vue is loaded. download other sounds.
+    loadOtherSounds();
 });
