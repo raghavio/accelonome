@@ -202,7 +202,7 @@
 						<input type="checkbox" v-model="drumsEnabled" :disabled="!areDrumsAvailable">Drums
 					</label>
 				</div>
-				<div class="col-xs-offset-4 col-xs-8 col-md-offset-5 col-md-7">
+				<div class="col-xs-offset-4 col-xs-8 col-md-offset-5 col-md-8">
 					<label class="checkbox-inline">
 						<input type="checkbox" v-model="vibrateOn"> Vibrate
 					</label>
@@ -214,7 +214,7 @@
 			</div>
 			<br />
 		</form>
-		<div id="playButtons" class="col-md-6">
+		<div id="playButtons" class="col-xs-12 col-sm-12 col-md-6">
 			<div class="col-xs-12 col-sm-12 col-md-12">
 				<label class="checkbox-inline"><input v-model="shouldAccelerate" :disabled="isPlaying" type="checkbox">
 					Accelerate</label>
@@ -226,7 +226,7 @@
 			</div>
 			<br />
 			<br />
-			<div class="knob-wrapper">
+			<div class="col-xs-12 knob-wrapper">
 				<div class="knob-container" @click="isPlaying ? stop() : play()">
 					<svg class="knob-svg" viewBox="0 0 100 100">
 						<circle class="knob-bg" cx="50" cy="50" r="45"></circle>
