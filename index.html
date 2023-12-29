@@ -28,50 +28,53 @@
 				margin-left: 10px;
 			}
 		}
+
 		.knob-wrapper {
 			display: flex;
 			justify-content: center;
 			align-items: center;
 			position: relative;
 		}
-		
+
 		.knob-container {
-            position: relative;
-            width: 320px;
-            height: 320px;
-        }
+			position: relative;
+			width: 320px;
+			height: 320px;
+		}
 
-        .knob-svg {
-            width: 100%;
-            height: 100%;
-        }
+		.knob-svg {
+			width: 100%;
+			height: 100%;
+		}
 
-        .knob-bg,
-        .knob-progress {
-            fill: none;
-            stroke-width: 6;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
+		.knob-bg,
+		.knob-progress {
+			fill: none;
+			stroke-width: 6;
+			transform: rotate(-90deg);
+			transform-origin: 50% 50%;
+		}
 
-        .knob-bg {
-            stroke: #2295f1;
-        }
+		.knob-bg {
+			stroke: #2295f1;
+		}
 
-        .knob-progress {
-            stroke: #ffeb3a;
-            stroke-dasharray: 282.6; /* Circumference of the circle with radius 45: 2 * 45 * π = 282.6 */
-            stroke-dashoffset: 282.6;
-            transition: stroke-dashoffset;
-            transition-timing-function: linear;
-        }
+		.knob-progress {
+			stroke: #ffeb3a;
+			stroke-dasharray: 282.6;
+			/* Circumference of the circle with radius 45: 2 * 45 * π = 282.6 */
+			stroke-dashoffset: 282.6;
+			transition: stroke-dashoffset;
+			transition-timing-function: linear;
+		}
 
-        .animate-btn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
+		.animate-btn {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
 		.knob-text {
 			position: absolute;
 			top: 50%;
@@ -79,7 +82,6 @@
 			transform: translate(-50%, -50%);
 			text-align: center;
 		}
-		
 	</style>
 </head>
 
@@ -240,22 +242,21 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<br />
 		</div>
 		<footer class="col-md-12 text-center">
 			<br />
-			<h5>If you liked this,</h5>
+			<h5>If you liked this, consider
 				<a href="https://www.buymeacoffee.com/antweb" target="_blank">
-					<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png"
-						alt="Support us by buying a coffee" style="height: 60px !important;width: 217px !important;">
-				</a>
-				<br />
-				<br />
-				<p class="text-muted">Made with ❤️ (and blistered fingers 🎸) by <a href="https://twitter.com/raghavio"
-						target="twt" style="color:#ffffff"><u>Raghav</u></a> and
-					<a href="https://twitter.com/antweb9" target="twt" style="color:#ffffff"><u>Ananth</u></a>
-				</p>
+					<span style="background-color: #2295f1; color: #000000;">buying us a coffee</span>
+				</a>.
+			</h5>
+			<br />
+			<p class="text-muted">Made with ❤️ (and blistered fingers 🎸) by <a href="https://twitter.com/raghavio"
+					target="twt" style="color:#ffffff"><u>Raghav</u></a> and
+				<a href="https://twitter.com/antweb9" target="twt" style="color:#ffffff"><u>Ananth</u></a>
+			</p>
 		</footer>
 	</main>
 	<script src="sounds.js"></script>
