@@ -21,3 +21,5 @@ has support for:
 Since the main intention of the app is to practice, I'm not allowing tempo change while the metronome is on. Because of this I can preschedule the sounds for one complete bar instead of doing it for each beat.
 
 I have a web worker whose job is to trigger the early scheduling of the bar using Web Audio APIs and to trigger when a bar is completed (for UI refresh). I'm using `setTimeout` for both these tasks. Using web workers because `setTimeout` in main thread isn't always accurate.
+
+Reach out to us on vananth09@gmail.com if you have any feature suggestions.
