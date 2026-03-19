@@ -35,38 +35,79 @@ function onWebAudioFontLoad() {
     player = new WebAudioFontPlayer(); // https://github.com/surikov/webaudiofont/
 }
 
+const SETTING_KEYS = [
+    'startTempo',
+    'endTempo',
+    'jumpBpm',
+    'tempoChangeAfterX',
+    'tempoChangeTrigger',
+    'note',
+    'beats',
+    'accentedBeats',
+    'tickSound',
+    'vibrateOn',
+    'reverseEnabled',
+    'shouldAccelerate',
+    'startCueEnabled',
+    'drumsEnabled',
+    'flashOn'];
+
+function loadSetting(key, fallback) {
+    const value = localStorage.getItem(key);
+    if (value === null) return fallback;
+    try { return JSON.parse(value); } catch (e) { return fallback; }
+}
+
+function saveSetting(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+function getDefaults() {
+    return {
+        isPlaying: false,
+        startTempo: 80,
+        tempoUI: null,
+        tempo: null,
+        endTempo: 160,
+        jumpBpm: 10,
+        tempoChangeAfterX: 4,  // value of the tempo change trigger. could be number of bars, seconds or minutes.
+        noteLength: 0.05,
+        nextNoteTime: 0,
+        currentBarUI: 1,
+        currentBar: 1,
+        scheduledBeats: [],
+        note: 4,  // default to quarter note.
+        beats: 4, // default to 4/4
+        accentedBeats: [1],
+        tempoChangeTrigger: 'bar', // tempo should get changed on Bar by default.
+        lastTempoChangeTime: null, // time when user clicked play.
+        tickSound: "metronome_1",
+        vibrateOn: false,
+        reverseEnabled: false,
+        isReversing: false,
+        shouldAccelerate: true,
+        startCueEnabled: true,
+        drumsEnabled: false,
+        flashOn: false,
+        isPhoneApp: IS_PHONE_APP
+    };
+}
+
 const vueApp = {
     data() {
-        return {
-            isPlaying: false,
-            startTempo: 80,
-            tempoUI: null,
-            tempo: null,
-            endTempo: 160,
-            jumpBpm: 10,
-            tempoChangeAfterX: 4,  // value of the tempo change trigger. could be number of bars, seconds or minutes.
-            noteLength: 0.05,
-            nextNoteTime: 0,
-            currentBarUI: 1,
-            currentBar: 1,
-            scheduledBeats: [],
-            note: 4,  // default to quarter note.
-            beats: 4, // default to 4/4
-            accentedBeats: [1],
-            tempoChangeTrigger: 'bar', // tempo should get changed on Bar by default.
-            lastTempoChangeTime: null, // time when user clicked play.
-            tickSound: "metronome_1",
-            vibrateOn: false,
-            reverseEnabled: false,
-            isReversing: false,
-            shouldAccelerate: true,
-            startCueEnabled: true,
-            drumsEnabled: false,
-            flashOn: false,
-            isPhoneApp: IS_PHONE_APP
-        }
+        const defaults = getDefaults();
+        SETTING_KEYS.forEach(key => defaults[key] = loadSetting(key, defaults[key]));
+        return defaults;
     },
     methods: {
+        resetSettings() {
+            this.stop();
+            const defaults = getDefaults();
+            SETTING_KEYS.forEach(key => {
+                localStorage.removeItem(key);
+                this[key] = defaults[key];
+            });
+        },
         reset() {
             this.stop();
             this.tempo = this.startTempo;
@@ -318,6 +359,9 @@ const vueApp = {
             this.tempo = this.startTempo;  // set new tempo only when startTempo's value changes.
             this.tempoUI = this.tempo;
         }
+    },
+    created() {
+        SETTING_KEYS.forEach(key => this.$watch(key, (v) => saveSetting(key, v)));
     }
 }
 
