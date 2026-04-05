@@ -35,35 +35,64 @@ function onWebAudioFontLoad() {
     player = new WebAudioFontPlayer(); // https://github.com/surikov/webaudiofont/
 }
 
+/**
+ * @param {unknown} value 
+ * @param {'number'|'boolean'|'string'|'intarray'} as 
+ * @param {unknown} fallback 
+ * @returns 
+ */
+function parse(value, as, fallback) {
+    if (IS_PHONE_APP) {
+        return fallback;
+    }
+    switch (as) {
+        case "number":
+            const parsedNumber = Number(value);
+            return !value || isNaN(parsedNumber) ? fallback : parsedNumber;
+        case "boolean":
+            return value === "true" || value === "on" ? true : fallback;
+        case "string":
+            return value ?? fallback;
+        case "intarray":
+            return value ? value.split(",").map(item => Number(item.trim())) : fallback;
+        default:
+            return fallback;
+    }
+}
+
 const vueApp = {
     data() {
+        const urlParams = IS_PHONE_APP ? {} : Object.fromEntries(new URLSearchParams(window.location.search));
+        const shouldTreatMissingBooleansAsFalse = !!Object.keys(urlParams).length;
         return {
+            // Runtime state
             isPlaying: false,
-            startTempo: 80,
             tempoUI: null,
             tempo: null,
-            endTempo: 160,
-            jumpBpm: 10,
-            tempoChangeAfterX: 4,  // value of the tempo change trigger. could be number of bars, seconds or minutes.
-            noteLength: 0.05,
-            nextNoteTime: 0,
             currentBarUI: 1,
             currentBar: 1,
             scheduledBeats: [],
-            note: 4,  // default to quarter note.
-            beats: 4, // default to 4/4
-            accentedBeats: [1],
-            tempoChangeTrigger: 'bar', // tempo should get changed on Bar by default.
-            lastTempoChangeTime: null, // time when user clicked play.
-            tickSound: "metronome_1",
-            vibrateOn: false,
-            reverseEnabled: false,
+            isPhoneApp: IS_PHONE_APP,
             isReversing: false,
-            shouldAccelerate: true,
-            startCueEnabled: true,
-            drumsEnabled: false,
-            flashOn: false,
-            isPhoneApp: IS_PHONE_APP
+            lastTempoChangeTime: null, // time when user clicked play.
+            // Form input states (serialized in URL for sharing)
+            startTempo: parse(urlParams.startTempo, "number", 80),
+            endTempo: parse(urlParams.endTempo, "number", 160),
+            jumpBpm: parse(urlParams.jumpBpm, "number", 10),
+            tempoChangeAfterX: parse(urlParams.tempoChangeAfterX, "number", 4),  // value of the tempo change trigger. could be number of bars, seconds or minutes.
+            noteLength: parse(urlParams.noteLength, "number", 0.05),
+            nextNoteTime: parse(urlParams.nextNoteTime, "number", 0),
+            note: parse(urlParams.note, "number", 4),  // default to quarter note.
+            beats: parse(urlParams.beats, "number", 4), // default to 4/4
+            accentedBeats: parse(urlParams.accentedBeats, "intarray", [1]),
+            tempoChangeTrigger: parse(urlParams.tempoChangeTrigger, "string", "bar"), // tempo should get changed on Bar by default.
+            tickSound: parse(urlParams.tickSound, "string", "metronome_1"),
+            vibrateOn: parse(urlParams.vibrateOn, "boolean", false),
+            reverseEnabled: parse(urlParams.reverseEnabled, "boolean", false),
+            shouldAccelerate: parse(urlParams.shouldAccelerate, "boolean", shouldTreatMissingBooleansAsFalse ? false : true),
+            startCueEnabled: parse(urlParams.startCueEnabled, "boolean", shouldTreatMissingBooleansAsFalse ? false : true),
+            drumsEnabled: parse(urlParams.drumsEnabled, "boolean", false),
+            flashOn: parse(urlParams.flashOn, "boolean", false),
         }
     },
     methods: {
@@ -87,6 +116,16 @@ const vueApp = {
             this.resetKnobAnimation();
             if (IS_PHONE_APP)
                 this.sendDataToAndroid("stop");
+        },
+        serialize() {
+            // update window url with URLSearchParams based on current form input values
+            const form = this.$refs.form;
+            const formData = new FormData(form);
+            formData.set("accentedBeats", this.accentedBeats);
+            const params = new URLSearchParams(formData);
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            // update window history without pushing a new navigation state, so that user can still use back button to exit the page.
+            window.history.replaceState(null, "", newUrl);
         },
         enableStartCue() {
             this.currentBar -= 1;
@@ -313,6 +352,10 @@ const vueApp = {
         //  bootstrap-select doesn't auto update on its own.
         beats: function (newValues, oldValues) {
             this.$nextTick(() => { $('.selectpicker').selectpicker('refresh'); });
+        },
+        // workaround for the fact that boostrap-select is being used for the multiselect, so we can't rely on form serialization
+        accentedBeats: function (newValues, oldValues) {
+            this.serialize();
         },
         startTempo: function (newValues, oldValues) {
             this.tempo = this.startTempo;  // set new tempo only when startTempo's value changes.
